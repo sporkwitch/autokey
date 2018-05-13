@@ -1,6 +1,12 @@
-autokey (0.94.1-0ubuntu1~bionic) bionic; urgency=medium
+autokey (0.94.1-0ubuntu2) bionic; urgency=medium
+
+  * Fix build deps 
+
+ -- Robert Klebes <robert@klebes.info>  Sun, 13 May 2018 19:02:29 -0400
+
+autokey (0.94.1-0ubuntu1) bionic; urgency=medium
 
   * Initial bionic release of Troy C. autokey from
     https://github.com/autokey/autokey
 
- -- Robert Klebes <robert@klebes.info>  Sun, 13 May 2018 14:54:55 -0400
+ -- Robert Klebes <robert@klebes.info>  Sun, 13 May 2018 18:33:56 -0400

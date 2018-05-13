@@ -7,6 +7,9 @@ Build-Depends:
 	python3-all,
 	python3-setuptools,
 	python3-dbus,
+    python3-xlib,
+    python3-gi,
+    gir1.2-gtk-3.0,
 	dh-python,
 	debhelper,
 Standards-Version: 3.9.7
@@ -38,7 +41,7 @@ Package: autokey-gtk
 Section: gnome
 Architecture: all
 Depends: ${python3:Depends}, ${misc:Depends}, python3-gi, gir1.2-gtk-3.0, gir1.2-gtksource-3.0, gir1.2-appindicator3-0.1, gir1.2-glib-2.0, gir1.2-notify-0.7, zenity, autokey-common
-Replaces: autokey (<<0.94.1-0~1)
+Replaces: autokey (<<0.94.1-0~2)
 Breaks: autokey (<<0.61.4-0~0)
 Description: desktop automation utility - GTK+ version
  AutoKey is a desktop automation utility for Linux and X11. It allows the

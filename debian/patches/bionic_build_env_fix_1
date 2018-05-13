@@ -1,13 +1,417 @@
-Description: Repackage for bionic
- Do not build -qt package due to missing dependencies
+Description: Fix build deps and env
+ Add missing build deps
+ Remove gtk version check
  .
- autokey (0.94.1-0ubuntu1~bionic) bionic; urgency=medium
+ autokey (0.94.1-0ubuntu1) bionic; urgency=medium
  .
    * Initial bionic release of Troy C. autokey from
      https://github.com/autokey/autokey
 Author: Robert Klebes <robert@klebes.info>
 Last-Update: 2018-05-13
 
+--- autokey-0.94.1.orig/lib/autokey/interface.py
++++ autokey-0.94.1/lib/autokey/interface.py
+@@ -40,7 +40,6 @@ if common.USING_QT:
+     from PyQt4.QtGui import QClipboard, QApplication
+ else:
+     import gi
+-    gi.require_version('Gtk', '3.0')
+     from gi.repository import Gtk, Gdk
+ 
+     try:
+@@ -58,7 +57,7 @@ try:
+     HAS_RECORD = True
+ except ImportError:
+     HAS_RECORD = False
+-    
++
+ from Xlib.protocol import rq, event
+ 
+ 
+@@ -117,11 +116,11 @@ class XInterfaceBase(threading.Thread):
+         self.lastChars = [] # QT4 Workaround
+         self.__enableQT4Workaround = False # QT4 Workaround
+         self.shutdown = False
+-        
++
+         # Event loop
+         self.eventThread = threading.Thread(target=self.__eventLoop)
+         self.queue = queue.Queue()
+-        
++
+         # Event listener
+         self.listenerThread = threading.Thread(target=self.__flushEvents)
+ 
+@@ -141,20 +140,20 @@ class XInterfaceBase(threading.Thread):
+         # Window name atoms
+         self.__NameAtom = self.localDisplay.intern_atom("_NET_WM_NAME", True)
+         self.__VisibleNameAtom = self.localDisplay.intern_atom("_NET_WM_VISIBLE_NAME", True)
+-        
++
+         if not common.USING_QT:
+             self.keyMap = Gdk.Keymap.get_default()
+             self.keyMap.connect("keys-changed", self.on_keys_changed)
+-        
++
+         self.__ignoreRemap = False
+-        
++
+         self.eventThread.start()
+         self.listenerThread.start()
+-        
++
+     def __eventLoop(self):
+         while True:
+             method, args = self.queue.get()
+-            
++
+             if method is None and args is None:
+                 break
+             elif method is not None and args is None:
+@@ -179,7 +178,7 @@ class XInterfaceBase(threading.Thread):
+         else:
+             logger.debug("Ignored keymap change event")
+ 
+-    def __delayedInitMappings(self):        
++    def __delayedInitMappings(self):
+         self.__initMappings()
+         self.__ignoreRemap = False
+ 
+@@ -187,7 +186,7 @@ class XInterfaceBase(threading.Thread):
+         self.localDisplay = display.Display()
+         self.rootWindow = self.localDisplay.screen().root
+         self.rootWindow.change_attributes(event_mask=X.SubstructureNotifyMask|X.StructureNotifyMask)
+-        
++
+         altList = self.localDisplay.keysym_to_keycodes(XK.XK_ISO_Level3_Shift)
+         self.__usableOffsets = (0, 1)
+         for code, offset in altList:
+@@ -257,22 +256,22 @@ class XInterfaceBase(threading.Thread):
+                 logger.debug("[%s]: %s", char, keyCodeList)
+             else:
+                 logger.debug("No mapping for [%s]", char)
+-                
++
+     def __needsMutterWorkaround(self, item):
+         if Key.SUPER not in item.modifiers:
+             return False
+-    
++
+         try:
+             output = subprocess.check_output(["ps", "-eo", "command"]).decode()
+         except subprocess.CalledProcessError:
+-            pass # since this is just a nasty workaround, if anything goes wrong just disable it 
++            pass # since this is just a nasty workaround, if anything goes wrong just disable it
+         else:
+             lines = output.splitlines()
+-            
++
+             for line in lines:
+                 if "gnome-shell" in line or "cinnamon" in line or "unity" in line:
+                     return True
+-                
++
+         return False
+ 
+     def __grabHotkeys(self):
+@@ -304,22 +303,22 @@ class XInterfaceBase(threading.Thread):
+             children = parent.query_tree().children
+         except:
+             return # window has been destroyed
+-            
++
+         for window in children:
+             try:
+                 title = self.get_window_title(window, False)
+                 klass = self.get_window_class(window, False)
+-                
++
+                 if title or klass:
+                     for item in hotkeys:
+                         if item.get_applicable_regex() is not None and item._should_trigger_window_title((title, klass)):
+                             self.__grabHotkey(item.hotKey, item.modifiers, window)
+                             self.__grabRecurse(item, window, False)
+-                        
++
+                 self.__enqueue(self.__recurseTree, window, hotkeys)
+             except:
+                 logger.exception("grab on window failed")
+-                
++
+     def __ungrabAllHotkeys(self):
+         """
+         Ungrab all hotkeys in preparation for keymap change
+@@ -333,34 +332,34 @@ class XInterfaceBase(threading.Thread):
+                 self.__ungrabHotkey(item.hotKey, item.modifiers, self.rootWindow)
+                 if self.__needsMutterWorkaround(item):
+                     self.__ungrabRecurse(item, self.rootWindow, False)
+-        
++
+         # Ungrab hotkeys without a filter in root window, recursively
+         for item in hotkeys:
+             if item.get_applicable_regex() is None:
+                 self.__ungrabHotkey(item.hotKey, item.modifiers, self.rootWindow)
+                 if self.__needsMutterWorkaround(item):
+                     self.__ungrabRecurse(item, self.rootWindow, False)
+-                
++
+         self.__recurseTreeUngrab(self.rootWindow, hotkeys)
+-                
++
+     def __recurseTreeUngrab(self, parent, hotkeys):
+         # Ungrab matching hotkeys in all open child windows
+         try:
+             children = parent.query_tree().children
+         except:
+             return # window has been destroyed
+-            
++
+         for window in children:
+             try:
+                 title = self.get_window_title(window, False)
+                 klass = self.get_window_class(window, False)
+-                
++
+                 if title or klass:
+                     for item in hotkeys:
+                         if item.get_applicable_regex() is not None and item._should_trigger_window_title((title, klass)):
+                             self.__ungrabHotkey(item.hotKey, item.modifiers, window)
+                             self.__ungrabRecurse(item, window, False)
+-                        
++
+                 self.__enqueue(self.__recurseTreeUngrab, window, hotkeys)
+             except:
+                 logger.exception("ungrab on window failed")
+@@ -419,17 +418,17 @@ class XInterfaceBase(threading.Thread):
+                 self.__enqueue(self.__grabRecurse, item, self.rootWindow, False)
+         else:
+             self.__enqueue(self.__grabRecurse, item, self.rootWindow)
+-        
++
+ 
+     def __grabRecurse(self, item, parent, checkWinInfo=True):
+         try:
+             children = parent.query_tree().children
+         except:
+             return # window has been destroyed
+-                     
++
+         for window in children:
+             shouldTrigger = False
+-            
++
+             if checkWinInfo:
+                 title = self.get_window_title(window, False)
+                 klass = self.get_window_class(window, False)
+@@ -450,7 +449,7 @@ class XInterfaceBase(threading.Thread):
+         """
+         import copy
+         newItem = copy.copy(item)
+-        
++
+         if item.get_applicable_regex() is None:
+             self.__enqueue(self.__ungrabHotkey, newItem.hotKey, newItem.modifiers, self.rootWindow)
+             if self.__needsMutterWorkaround(item):
+@@ -463,11 +462,11 @@ class XInterfaceBase(threading.Thread):
+             children = parent.query_tree().children
+         except:
+             return # window has been destroyed
+-                     
++
+         for window in children:
+             shouldTrigger = False
+-            
+-            if checkWinInfo:        
++
++            if checkWinInfo:
+                 title = self.get_window_title(window, False)
+                 klass = self.get_window_class(window, False)
+                 shouldTrigger = item._should_trigger_window_title((title, klass))
+@@ -524,7 +523,7 @@ class XInterfaceBase(threading.Thread):
+ 
+     def send_string_clipboard(self, string, pasteCommand):
+         self.__enqueue(self.__sendStringClipboard, string, pasteCommand)
+-        
++
+     def __sendStringClipboard(self, string, pasteCommand):
+         logger.debug("Sending string: %r", string)
+ 
+@@ -607,7 +606,7 @@ class XInterfaceBase(threading.Thread):
+ 
+     def ungrab_keyboard(self):
+         self.__enqueue(self.__ungrabKeyboard)
+-        
++
+     def __ungrabKeyboard(self):
+         self.localDisplay.ungrab_keyboard(X.CurrentTime)
+         self.localDisplay.flush()
+@@ -621,7 +620,7 @@ class XInterfaceBase(threading.Thread):
+ 
+     def send_string(self, string):
+         self.__enqueue(self.__sendString, string)
+-        
++
+     def __sendString(self, string):
+         """
+         Send a string of printable characters.
+@@ -725,29 +724,29 @@ class XInterfaceBase(threading.Thread):
+         Send a specific non-printing key, eg Up, Left, etc
+         """
+         self.__enqueue(self.__sendKey, keyName)
+-        
++
+     def __sendKey(self, keyName):
+         logger.debug("Send special key: [%r]", keyName)
+         self.__sendKeyCode(self.__lookupKeyCode(keyName))
+ 
+     def fake_keypress(self, keyName):
+          self.__enqueue(self.__fakeKeypress, keyName)
+-         
+-    def __fakeKeypress(self, keyName):        
++
++    def __fakeKeypress(self, keyName):
+         keyCode = self.__lookupKeyCode(keyName)
+         xtest.fake_input(self.rootWindow, X.KeyPress, keyCode)
+         xtest.fake_input(self.rootWindow, X.KeyRelease, keyCode)
+ 
+     def fake_keydown(self, keyName):
+         self.__enqueue(self.__fakeKeydown, keyName)
+-        
++
+     def __fakeKeydown(self, keyName):
+         keyCode = self.__lookupKeyCode(keyName)
+         xtest.fake_input(self.rootWindow, X.KeyPress, keyCode)
+ 
+     def fake_keyup(self, keyName):
+         self.__enqueue(self.__fakeKeyup, keyName)
+-        
++
+     def __fakeKeyup(self, keyName):
+         keyCode = self.__lookupKeyCode(keyName)
+         xtest.fake_input(self.rootWindow, X.KeyRelease, keyCode)
+@@ -757,7 +756,7 @@ class XInterfaceBase(threading.Thread):
+         Send a modified key (e.g. when emulating a hotkey)
+         """
+         self.__enqueue(self.__sendModifiedKey, keyName, modifiers)
+-        
++
+     def __sendModifiedKey(self, keyName, modifiers):
+         logger.debug("Send modified key: modifiers: %s key: %s", modifiers, keyName)
+         try:
+@@ -773,8 +772,8 @@ class XInterfaceBase(threading.Thread):
+ 
+     def send_mouse_click(self, xCoord, yCoord, button, relative):
+         self.__enqueue(self.__sendMouseClick, xCoord, yCoord, button, relative)
+-        
+-    def __sendMouseClick(self, xCoord, yCoord, button, relative):    
++
++    def __sendMouseClick(self, xCoord, yCoord, button, relative):
+         # Get current pointer position so we can return it there
+         pos = self.rootWindow.query_pointer()
+ 
+@@ -794,7 +793,7 @@ class XInterfaceBase(threading.Thread):
+ 
+     def send_mouse_click_relative(self, xoff, yoff, button):
+         self.__enqueue(self.__sendMouseClickRelative, xoff, yoff, button)
+-        
++
+     def __sendMouseClickRelative(self, xoff, yoff, button):
+         # Get current pointer position
+         pos = self.rootWindow.query_pointer()
+@@ -812,20 +811,20 @@ class XInterfaceBase(threading.Thread):
+ 
+     def flush(self):
+         self.__enqueue(self.__flush)
+-        
++
+     def __flush(self):
+         self.localDisplay.flush()
+         self.lastChars = []
+ 
+     def press_key(self, keyName):
+         self.__enqueue(self.__pressKey, keyName)
+-        
++
+     def __pressKey(self, keyName):
+         self.__sendKeyPressEvent(self.__lookupKeyCode(keyName), 0)
+ 
+     def release_key(self, keyName):
+         self.__enqueue(self.__releaseKey, keyName)
+-        
++
+     def __releaseKey(self, keyName):
+         self.__sendKeyReleaseEvent(self.__lookupKeyCode(keyName), 0)
+ 
+@@ -838,14 +837,14 @@ class XInterfaceBase(threading.Thread):
+                 if self.localDisplay in readable:
+                     createdWindows = []
+                     destroyedWindows = []
+-                    
++
+                     for x in range(self.localDisplay.pending_events()):
+                         event = self.localDisplay.next_event()
+                         if event.type == X.CreateNotify:
+                             createdWindows.append(event.window)
+                         if event.type == X.DestroyNotify:
+                             destroyedWindows.append(event.window)
+-                            
++
+                     for window in createdWindows:
+                         if window not in destroyedWindows:
+                             self.__enqueue(self.__grabHotkeysForWindow, window)
+@@ -859,7 +858,7 @@ class XInterfaceBase(threading.Thread):
+ 
+     def handle_keypress(self, keyCode):
+         self.__enqueue(self.__handleKeyPress, keyCode)
+-    
++
+     def __handleKeyPress(self, keyCode):
+         focus = self.localDisplay.get_input_focus().focus
+ 
+@@ -871,20 +870,20 @@ class XInterfaceBase(threading.Thread):
+ 
+     def handle_keyrelease(self, keyCode):
+         self.__enqueue(self.__handleKeyrelease, keyCode)
+-    
++
+     def __handleKeyrelease(self, keyCode):
+         modifier = self.__decodeModifier(keyCode)
+         if modifier is not None:
+             self.mediator.handle_modifier_up(modifier)
+-            
++
+     def handle_mouseclick(self, button, x, y):
+         self.__enqueue(self.__handleMouseclick, button, x, y)
+-        
+-    def __handleMouseclick(self, button, x, y):        
++
++    def __handleMouseclick(self, button, x, y):
+         title = self.get_window_title()
+         klass = self.get_window_class()
+         info = (title, klass)
+-        
++
+         if x is None and y is None:
+             ret = self.localDisplay.get_input_focus().focus.query_pointer()
+             self.mediator.handle_mouse_click(ret.root_x, ret.root_y, ret.win_x, ret.win_y, button, info)
+@@ -1033,7 +1032,7 @@ class XInterfaceBase(threading.Thread):
+             return ""
+         # except:
+         #     return ""
+-    
++
+     def __getWinClass(self, windowvar, traverse):
+         wmclass = windowvar.get_wm_class()
+ 
+@@ -1044,7 +1043,7 @@ class XInterfaceBase(threading.Thread):
+                 return ""
+ 
+         return wmclass[0] + '.' + wmclass[1]
+-    
++
+     def cancel(self):
+         logger.debug("XInterfaceBase: Try to exit event thread.")
+         self.queue.put_nowait((None, None))
 --- /dev/null
 +++ autokey-0.94.1/tags
 @@ -0,0 +1,2845 @@
@@ -1672,7 +2076,7 @@ Last-Update: 2018-05-13
 +__createToggleAction	lib/autokey/qtui/configwindow.py	/^    def __createToggleAction(self, actionName, name, target, iconName=None):$/;"	m	class:ConfigWindow	file:
 +__decodeModifier	lib/autokey/interface.py	/^    def __decodeModifier(self, keyCode):$/;"	m	class:XInterfaceBase	file:
 +__delayPassed	lib/autokey/iomediator/_keygrabber.py	/^    def __delayPassed(self):$/;"	m	class:Recorder	file:
-+__delayedInitMappings	lib/autokey/interface.py	/^    def __delayedInitMappings(self):        $/;"	m	class:XInterfaceBase	file:
++__delayedInitMappings	lib/autokey/interface.py	/^    def __delayedInitMappings(self):$/;"	m	class:XInterfaceBase	file:
 +__deleteHotkeys	lib/autokey/gtkui/configwindow.py	/^    def __deleteHotkeys(self, theItem):$/;"	m	class:ConfigWindow	file:
 +__deleteHotkeys	lib/autokey/qtui/configwindow.py	/^    def __deleteHotkeys(self, theItem):$/;"	m	class:CentralWidget	file:
 +__doQT4Workaround	lib/autokey/interface.py	/^    def __doQT4Workaround(self, keyCode):$/;"	m	class:XInterfaceBase	file:
@@ -1685,7 +2089,7 @@ Last-Update: 2018-05-13
 +__execAsync	lib/autokey/scripting.py	/^    def __execAsync(self, callback, *args):$/;"	m	class:QtClipboard	file:
 +__extractData	lib/autokey/qtui/configwindow.py	/^    def __extractData(self, item):$/;"	m	class:CentralWidget	file:
 +__fakeKeydown	lib/autokey/interface.py	/^    def __fakeKeydown(self, keyName):$/;"	m	class:XInterfaceBase	file:
-+__fakeKeypress	lib/autokey/interface.py	/^    def __fakeKeypress(self, keyName):        $/;"	m	class:XInterfaceBase	file:
++__fakeKeypress	lib/autokey/interface.py	/^    def __fakeKeypress(self, keyName):$/;"	m	class:XInterfaceBase	file:
 +__fakeKeyup	lib/autokey/interface.py	/^    def __fakeKeyup(self, keyName):$/;"	m	class:XInterfaceBase	file:
 +__fillClipboard	doc/scripting/lib.scripting.GtkClipboard-class.html	/^          <td><span class="summary-sig"><a name="__fillClipboard"><\/a><span class="summary-sig-name">__fillClipboard<\/span>(<span class="summary-sig-arg">self<\/span>,$/;"	a
 +__fillClipboard	doc/scripting/lib.scripting.QtClipboard-class.html	/^          <td><span class="summary-sig"><a name="__fillClipboard"><\/a><span class="summary-sig-name">__fillClipboard<\/span>(<span class="summary-sig-arg">self<\/span>,$/;"	a
@@ -1730,7 +2134,7 @@ Last-Update: 2018-05-13
 +__grab_keyboard	lib/autokey/interface.py	/^    def __grab_keyboard(self):$/;"	m	class:XInterfaceBase	file:
 +__handleKeyPress	lib/autokey/interface.py	/^    def __handleKeyPress(self, keyCode):$/;"	m	class:XInterfaceBase	file:
 +__handleKeyrelease	lib/autokey/interface.py	/^    def __handleKeyrelease(self, keyCode):$/;"	m	class:XInterfaceBase	file:
-+__handleMouseclick	lib/autokey/interface.py	/^    def __handleMouseclick(self, button, x, y):        $/;"	m	class:XInterfaceBase	file:
++__handleMouseclick	lib/autokey/interface.py	/^    def __handleMouseclick(self, button, x, y):$/;"	m	class:XInterfaceBase	file:
 +__haveMatch	lib/autokey/service.py	/^    def __haveMatch(self, data):$/;"	m	class:Service	file:
 +__initMappings	lib/autokey/interface.py	/^    def __initMappings(self):$/;"	m	class:XInterfaceBase	file:
 +__initStack	lib/autokey/gtkui/configwindow.py	/^    def __initStack(self):$/;"	m	class:ConfigWindow	file:
@@ -1869,7 +2273,7 @@ Last-Update: 2018-05-13
 +__sendKeyPressEvent	lib/autokey/interface.py	/^    def __sendKeyPressEvent(self, keyCode, modifiers, theWindow=None):$/;"	m	class:XInterfaceBase	file:
 +__sendKeyReleaseEvent	lib/autokey/interface.py	/^    def __sendKeyReleaseEvent(self, keyCode, modifiers, theWindow=None):$/;"	m	class:XInterfaceBase	file:
 +__sendModifiedKey	lib/autokey/interface.py	/^    def __sendModifiedKey(self, keyName, modifiers):$/;"	m	class:XInterfaceBase	file:
-+__sendMouseClick	lib/autokey/interface.py	/^    def __sendMouseClick(self, xCoord, yCoord, button, relative):    $/;"	m	class:XInterfaceBase	file:
++__sendMouseClick	lib/autokey/interface.py	/^    def __sendMouseClick(self, xCoord, yCoord, button, relative):$/;"	m	class:XInterfaceBase	file:
 +__sendMouseClickRelative	lib/autokey/interface.py	/^    def __sendMouseClickRelative(self, xoff, yoff, button):$/;"	m	class:XInterfaceBase	file:
 +__sendString	lib/autokey/interface.py	/^    def __sendString(self, string):$/;"	m	class:XInterfaceBase	file:
 +__sendStringClipboard	lib/autokey/interface.py	/^    def __sendStringClipboard(self, string, pasteCommand):$/;"	m	class:XInterfaceBase	file:

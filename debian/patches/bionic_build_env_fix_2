@@ -1,0 +1,448 @@
+Index: autokey/tags
+===================================================================
+--- autokey.orig/tags
++++ autokey/tags
+@@ -7,6 +7,7 @@
+ A	doc/scripting/identifier-index.html	/^<tr valign="top"><td valign="top" width="1%"><h2 class="epydoc"><a name="A">A<\/a><\/h2><\/td>$/;"	a
+ ABBREVIATION	lib/autokey/model.py	/^    ABBREVIATION = 1$/;"	v	class:TriggerMode
+ ACTION_DESCRIPTION_FILE	lib/autokey/qtui/configwindow.py	/^ACTION_DESCRIPTION_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data\/gui.xml")$/;"	v
++AK_TO_XK_MAP	.pc/bionic_build_env_fix_1/lib/autokey/interface.py	/^AK_TO_XK_MAP = dict((v,k) for k, v in XK_TO_AK_MAP.items())$/;"	v
+ AK_TO_XK_MAP	lib/autokey/interface.py	/^AK_TO_XK_MAP = dict((v,k) for k, v in XK_TO_AK_MAP.items())$/;"	v
+ ALT	lib/autokey/iomediator/key.py	/^    ALT = "<alt>"$/;"	v	class:Key
+ ALT_GR	lib/autokey/iomediator/key.py	/^    ALT_GR = "<alt_gr>"$/;"	v	class:Key
+@@ -34,6 +35,7 @@ AkTreeWidget	lib/autokey/qtui/configwind
+ AppService	lib/autokey/common.py	/^class AppService(dbus.service.Object):$/;"	c
+ Application	lib/autokey/gtkapp.py	/^class Application:$/;"	c
+ Application	lib/autokey/qtapp.py	/^class Application:$/;"	c
++AtSpiInterface	.pc/bionic_build_env_fix_1/lib/autokey/interface.py	/^class AtSpiInterface(XInterfaceBase):$/;"	c
+ AtSpiInterface	lib/autokey/interface.py	/^class AtSpiInterface(XInterfaceBase):$/;"	c
+ BACKSPACE	lib/autokey/iomediator/key.py	/^    BACKSPACE = "<backspace>"$/;"	v	class:Key
+ BUG_EMAIL	lib/autokey/common.py	/^BUG_EMAIL = "guociz@gmail.com"$/;"	v
+@@ -41,6 +43,7 @@ BUG_URL	lib/autokey/common.py	/^BUG_URL
+ BlankPage	lib/autokey/gtkui/configwindow.py	/^class BlankPage:$/;"	c
+ C	doc/scripting/identifier-index.html	/^<tr valign="top"><td valign="top" width="1%"><h2 class="epydoc"><a name="C">C<\/a><\/h2><\/td>$/;"	a
+ CAPSLOCK	lib/autokey/iomediator/key.py	/^    CAPSLOCK = "<capslock>"$/;"	v	class:Key
++CAPSLOCK_LEDMASK	.pc/bionic_build_env_fix_1/lib/autokey/interface.py	/^CAPSLOCK_LEDMASK = 1<<0$/;"	v
+ CAPSLOCK_LEDMASK	lib/autokey/interface.py	/^CAPSLOCK_LEDMASK = 1<<0$/;"	v
+ CATALOG	lib/autokey/common.py	/^CATALOG = ""$/;"	v
+ CB_CTRL_SHIFT_V	lib/autokey/model.py	/^    CB_CTRL_SHIFT_V = Key.CONTROL + '+' + Key.SHIFT + "+v"$/;"	v	class:SendMode
+@@ -171,8 +174,12 @@ GtkDialog.list_menu_multi	doc/scripting/
+ GtkDialog.open_file	doc/scripting/lib.scripting-pysrc.html	/^<a name="GtkDialog.open_file"><\/a><div id="GtkDialog.open_file-def"><a name="L631"><\/a><tt class="py-lineno"> 631<\/tt> <a class="py-toggle" href="#" id="GtkDialog.open_file-toggle" onclick="return toggle('GtkDialog.open_file');">-<\/a><tt class="py-line">    <tt class="py-keyword">def<\/tt> <a class="py-def-name" href="lib.scripting.GtkDialog-class.html#open_file">open_file<\/a><tt class="py-op">(<\/tt><tt class="py-param">self<\/tt><tt class="py-op">,<\/tt> <tt class="py-param">title<\/tt><tt class="py-op">=<\/tt><tt class="py-string">"Open File"<\/tt><tt class="py-op">,<\/tt> <tt class="py-op">**<\/tt><tt class="py-param">kwargs<\/tt><tt class="py-op">)<\/tt><tt class="py-op">:<\/tt> <\/tt>$/;"	a
+ GtkDialog.password_dialog	doc/scripting/lib.scripting-pysrc.html	/^<a name="GtkDialog.password_dialog"><\/a><div id="GtkDialog.password_dialog-def"><a name="L541"><\/a><tt class="py-lineno"> 541<\/tt> <a class="py-toggle" href="#" id="GtkDialog.password_dialog-toggle" onclick="return toggle('GtkDialog.password_dialog');">-<\/a><tt class="py-line">    <tt class="py-keyword">def<\/tt> <a class="py-def-name" href="lib.scripting.GtkDialog-class.html#password_dialog">password_dialog<\/a><tt class="py-op">(<\/tt><tt class="py-param">self<\/tt><tt class="py-op">,<\/tt> <tt class="py-param">title<\/tt><tt class="py-op">=<\/tt><tt class="py-string">"Enter password"<\/tt><tt class="py-op">,<\/tt> <tt class="py-param">message<\/tt><tt class="py-op">=<\/tt><tt class="py-string">"Enter password"<\/tt><tt class="py-op">,<\/tt> <tt class="py-op">**<\/tt><tt class="py-param">kwargs<\/tt><tt class="py-op">)<\/tt><tt class="py-op">:<\/tt> <\/tt>$/;"	a
+ GtkDialog.save_file	doc/scripting/lib.scripting-pysrc.html	/^<a name="GtkDialog.save_file"><\/a><div id="GtkDialog.save_file-def"><a name="L646"><\/a><tt class="py-lineno"> 646<\/tt> <a class="py-toggle" href="#" id="GtkDialog.save_file-toggle" onclick="return toggle('GtkDialog.save_file');">-<\/a><tt class="py-line">    <tt class="py-keyword">def<\/tt> <a class="py-def-name" href="lib.scripting.GtkDialog-class.html#save_file">save_file<\/a><tt class="py-op">(<\/tt><tt class="py-param">self<\/tt><tt class="py-op">,<\/tt> <tt class="py-param">title<\/tt><tt class="py-op">=<\/tt><tt class="py-string">"Save As"<\/tt><tt class="py-op">,<\/tt> <tt class="py-op">**<\/tt><tt class="py-param">kwargs<\/tt><tt class="py-op">)<\/tt><tt class="py-op">:<\/tt> <\/tt>$/;"	a
++HAS_ATSPI	.pc/bionic_build_env_fix_1/lib/autokey/interface.py	/^        HAS_ATSPI = False$/;"	v
++HAS_ATSPI	.pc/bionic_build_env_fix_1/lib/autokey/interface.py	/^        HAS_ATSPI = True$/;"	v
+ HAS_ATSPI	lib/autokey/interface.py	/^        HAS_ATSPI = False$/;"	v
+ HAS_ATSPI	lib/autokey/interface.py	/^        HAS_ATSPI = True$/;"	v
++HAS_RECORD	.pc/bionic_build_env_fix_1/lib/autokey/interface.py	/^    HAS_RECORD = False$/;"	v
++HAS_RECORD	.pc/bionic_build_env_fix_1/lib/autokey/interface.py	/^    HAS_RECORD = True$/;"	v
+ HAS_RECORD	lib/autokey/interface.py	/^    HAS_RECORD = False$/;"	v
+ HAS_RECORD	lib/autokey/interface.py	/^    HAS_RECORD = True$/;"	v
+ HELD_MODIFIERS	lib/autokey/iomediator/constants.py	/^HELD_MODIFIERS = [Key.CONTROL, Key.ALT, Key.SUPER, Key.SHIFT, Key.HYPER, Key.META]$/;"	v
+@@ -1415,6 +1422,7 @@ M	doc/scripting/identifier-index.html	/^
+ MAINTAINER	lib/autokey/common.py	/^MAINTAINER = 'GuoCi'$/;"	v
+ MAINTAINER_EMAIL	lib/autokey/common.py	/^MAINTAINER_EMAIL = 'guociz@gmail.com'$/;"	v
+ MASK	lib/autokey/monitor.py	/^MASK = m["IN_CREATE"]|m["IN_MODIFY"]|m["IN_DELETE"]|m["IN_MOVED_TO"]|m["IN_MOVED_FROM"]$/;"	v
++MASK_INDEXES	.pc/bionic_build_env_fix_1/lib/autokey/interface.py	/^MASK_INDEXES = [$/;"	v
+ MASK_INDEXES	lib/autokey/interface.py	/^MASK_INDEXES = [$/;"	v
+ MAX_LOG_COUNT	lib/autokey/common.py	/^MAX_LOG_COUNT = 3$/;"	v
+ MAX_LOG_SIZE	lib/autokey/common.py	/^MAX_LOG_SIZE = 5 * 1024 * 1024  # 5 megabytes$/;"	v
+@@ -1454,6 +1462,7 @@ NP_RIGHT	lib/autokey/iomediator/key.py	/
+ NP_SUBTRACT	lib/autokey/iomediator/key.py	/^    NP_SUBTRACT = "<np_subtract>"$/;"	v	class:Key
+ NP_UP	lib/autokey/iomediator/key.py	/^    NP_UP = "<np_up>"$/;"	v	class:Key
+ NUMLOCK	lib/autokey/iomediator/key.py	/^    NUMLOCK = "<numlock>"$/;"	v	class:Key
++NUMLOCK_LEDMASK	.pc/bionic_build_env_fix_1/lib/autokey/interface.py	/^NUMLOCK_LEDMASK = 1<<1$/;"	v
+ NUMLOCK_LEDMASK	lib/autokey/interface.py	/^NUMLOCK_LEDMASK = 1<<1$/;"	v
+ Notifier	lib/autokey/qtui/notifier.py	/^class Notifier:$/;"	c
+ O	doc/scripting/identifier-index.html	/^<tr valign="top"><td valign="top" width="1%"><h2 class="epydoc"><a name="O">O<\/a><\/h2><\/td>$/;"	a
+@@ -1627,10 +1636,14 @@ WindowFilterSettingsDialog	lib/autokey/g
+ WindowFilterSettingsDialog	lib/autokey/qtui/dialogs.py	/^class WindowFilterSettingsDialog(KDialog):$/;"	c
+ WindowGrabber	lib/autokey/iomediator/_windowgrabber.py	/^class WindowGrabber:$/;"	c
+ XDG_CACHE_HOME	lib/autokey/common.py	/^XDG_CACHE_HOME = os.environ.get('XDG_CACHE_HOME', os.path.expanduser('~\/.cache'))$/;"	v
++XInterfaceBase	.pc/bionic_build_env_fix_1/lib/autokey/interface.py	/^class XInterfaceBase(threading.Thread):$/;"	c
+ XInterfaceBase	lib/autokey/interface.py	/^class XInterfaceBase(threading.Thread):$/;"	c
++XK_TO_AK_MAP	.pc/bionic_build_env_fix_1/lib/autokey/interface.py	/^XK_TO_AK_MAP = {$/;"	v
+ XK_TO_AK_MAP	lib/autokey/interface.py	/^XK_TO_AK_MAP = {$/;"	v
++XK_TO_AK_NUMLOCKED	.pc/bionic_build_env_fix_1/lib/autokey/interface.py	/^XK_TO_AK_NUMLOCKED = {$/;"	v
+ XK_TO_AK_NUMLOCKED	lib/autokey/interface.py	/^XK_TO_AK_NUMLOCKED = {$/;"	v
+ XLibInterfaceTest	test/interfacetest.py	/^class XLibInterfaceTest(unittest.TestCase):$/;"	c
++XRecordInterface	.pc/bionic_build_env_fix_1/lib/autokey/interface.py	/^class XRecordInterface(XInterfaceBase):$/;"	c
+ XRecordInterface	lib/autokey/interface.py	/^class XRecordInterface(XInterfaceBase):$/;"	c
+ X_RECORD_INTERFACE	lib/autokey/iomediator/constants.py	/^X_RECORD_INTERFACE = "XRecord"$/;"	v
+ _	doc/scripting/identifier-index.html	/^<tr valign="top"><td valign="top" width="1%"><h2 class="epydoc"><a name="_">_<\/a><\/h2><\/td>$/;"	a
+@@ -1638,6 +1651,7 @@ _	lib/autokey/macro.py	/^    _ = ki18n
+ __addItem	lib/autokey/qtui/configwindow.py	/^    def __addItem(self, item):$/;"	m	class:ListWidgetHandler	file:
+ __addItemsToSelf	lib/autokey/gtkui/popupmenu.py	/^    def __addItemsToSelf(self, items, service, onDesktop):$/;"	m	class:PopupMenu	file:
+ __addToolbar	lib/autokey/gtkui/configwindow.py	/^    def __addToolbar(self):$/;"	m	class:ConfigWindow	file:
++__all__	.pc/bionic_build_env_fix_1/lib/autokey/interface.py	/^__all__ = ["XRecordInterface", "AtSpiInterface"]$/;"	v
+ __all__	lib/autokey/gtkui/dialogs.py	/^__all__ = ["validate", "EMPTY_FIELD_REGEX", "AbbrSettingsDialog", "HotkeySettingsDialog", "WindowFilterSettingsDialog", "RecordDialog"]$/;"	v
+ __all__	lib/autokey/interface.py	/^__all__ = ["XRecordInterface", "AtSpiInterface"]$/;"	v
+ __all__	lib/autokey/qtui/dialogs.py	/^__all__ = ["validate", "EMPTY_FIELD_REGEX", "AbbrSettingsDialog", "HotkeySettingsDialog", "WindowFilterSettingsDialog", "RecordDialog"]$/;"	v
+@@ -1646,6 +1660,7 @@ __checkExisting	lib/autokey/configmanage
+ __checkExistingFolder	lib/autokey/configmanager.py	/^    def __checkExistingFolder(self, path):$/;"	m	class:ConfigManager	file:
+ __checkInput	lib/autokey/model.py	/^    def __checkInput(self, buffer, abbr):$/;"	m	class:AbstractAbbreviation	file:
+ __checkTextMatches	lib/autokey/service.py	/^    def __checkTextMatches(self, folders, items, buffer, windowInfo, immediate=False):$/;"	m	class:Service	file:
++__checkWorkaroundNeeded	.pc/bionic_build_env_fix_1/lib/autokey/interface.py	/^    def __checkWorkaroundNeeded(self):$/;"	m	class:XInterfaceBase	file:
+ __checkWorkaroundNeeded	lib/autokey/interface.py	/^    def __checkWorkaroundNeeded(self):$/;"	m	class:XInterfaceBase	file:
+ __clearModifiers	lib/autokey/iomediator/_iomediator.py	/^    def __clearModifiers(self):$/;"	m	class:IoMediator	file:
+ __completeShutdown	lib/autokey/gtkapp.py	/^    def __completeShutdown(self):$/;"	m	class:Application	file:
+@@ -1657,35 +1672,48 @@ __createLockFile	lib/autokey/qtapp.py	/^
+ __createMenu	lib/autokey/qtapp.py	/^    def __createMenu(self, folders, items, onDesktop, title):$/;"	m	class:Application	file:
+ __createMenuAction	lib/autokey/qtui/configwindow.py	/^    def __createMenuAction(self, actionName, name, target=None, iconName=None):$/;"	m	class:ConfigWindow	file:
+ __createToggleAction	lib/autokey/qtui/configwindow.py	/^    def __createToggleAction(self, actionName, name, target, iconName=None):$/;"	m	class:ConfigWindow	file:
++__decodeModifier	.pc/bionic_build_env_fix_1/lib/autokey/interface.py	/^    def __decodeModifier(self, keyCode):$/;"	m	class:XInterfaceBase	file:
+ __decodeModifier	lib/autokey/interface.py	/^    def __decodeModifier(self, keyCode):$/;"	m	class:XInterfaceBase	file:
+ __delayPassed	lib/autokey/iomediator/_keygrabber.py	/^    def __delayPassed(self):$/;"	m	class:Recorder	file:
++__delayedInitMappings	.pc/bionic_build_env_fix_1/lib/autokey/interface.py	/^    def __delayedInitMappings(self):        $/;"	m	class:XInterfaceBase	file:
+ __delayedInitMappings	lib/autokey/interface.py	/^    def __delayedInitMappings(self):$/;"	m	class:XInterfaceBase	file:
+ __deleteHotkeys	lib/autokey/gtkui/configwindow.py	/^    def __deleteHotkeys(self, theItem):$/;"	m	class:ConfigWindow	file:
+ __deleteHotkeys	lib/autokey/qtui/configwindow.py	/^    def __deleteHotkeys(self, theItem):$/;"	m	class:CentralWidget	file:
++__doQT4Workaround	.pc/bionic_build_env_fix_1/lib/autokey/interface.py	/^    def __doQT4Workaround(self, keyCode):$/;"	m	class:XInterfaceBase	file:
+ __doQT4Workaround	lib/autokey/interface.py	/^    def __doQT4Workaround(self, keyCode):$/;"	m	class:XInterfaceBase	file:
+ __doRecord	lib/autokey/qtui/configwindow.py	/^    def __doRecord(self, ok, recKb, recMouse, delay):$/;"	m	class:ConfigWindow	file:
+ __dropRecurseUpdate	lib/autokey/gtkui/configwindow.py	/^    def __dropRecurseUpdate(self, folder):$/;"	m	class:ConfigWindow	file:
++__enqueue	.pc/bionic_build_env_fix_1/lib/autokey/interface.py	/^    def __enqueue(self, method, *args):$/;"	m	class:XInterfaceBase	file:
+ __enqueue	lib/autokey/interface.py	/^    def __enqueue(self, method, *args):$/;"	m	class:XInterfaceBase	file:
++__eventLoop	.pc/bionic_build_env_fix_1/lib/autokey/interface.py	/^    def __eventLoop(self):$/;"	m	class:XInterfaceBase	file:
+ __eventLoop	lib/autokey/interface.py	/^    def __eventLoop(self):$/;"	m	class:XInterfaceBase	file:
+ __execAsync	doc/scripting/lib.scripting.GtkClipboard-class.html	/^          <td><span class="summary-sig"><a name="__execAsync"><\/a><span class="summary-sig-name">__execAsync<\/span>(<span class="summary-sig-arg">self<\/span>,$/;"	a
+ __execAsync	doc/scripting/lib.scripting.QtClipboard-class.html	/^          <td><span class="summary-sig"><a name="__execAsync"><\/a><span class="summary-sig-name">__execAsync<\/span>(<span class="summary-sig-arg">self<\/span>,$/;"	a
+ __execAsync	lib/autokey/scripting.py	/^    def __execAsync(self, callback, *args):$/;"	m	class:QtClipboard	file:
+ __extractData	lib/autokey/qtui/configwindow.py	/^    def __extractData(self, item):$/;"	m	class:CentralWidget	file:
++__fakeKeydown	.pc/bionic_build_env_fix_1/lib/autokey/interface.py	/^    def __fakeKeydown(self, keyName):$/;"	m	class:XInterfaceBase	file:
+ __fakeKeydown	lib/autokey/interface.py	/^    def __fakeKeydown(self, keyName):$/;"	m	class:XInterfaceBase	file:
++__fakeKeypress	.pc/bionic_build_env_fix_1/lib/autokey/interface.py	/^    def __fakeKeypress(self, keyName):        $/;"	m	class:XInterfaceBase	file:
+ __fakeKeypress	lib/autokey/interface.py	/^    def __fakeKeypress(self, keyName):$/;"	m	class:XInterfaceBase	file:
++__fakeKeyup	.pc/bionic_build_env_fix_1/lib/autokey/interface.py	/^    def __fakeKeyup(self, keyName):$/;"	m	class:XInterfaceBase	file:
+ __fakeKeyup	lib/autokey/interface.py	/^    def __fakeKeyup(self, keyName):$/;"	m	class:XInterfaceBase	file:
++__fillClipboard	.pc/bionic_build_env_fix_1/lib/autokey/interface.py	/^    def __fillClipboard(self, string):$/;"	m	class:XInterfaceBase	file:
+ __fillClipboard	doc/scripting/lib.scripting.GtkClipboard-class.html	/^          <td><span class="summary-sig"><a name="__fillClipboard"><\/a><span class="summary-sig-name">__fillClipboard<\/span>(<span class="summary-sig-arg">self<\/span>,$/;"	a
+ __fillClipboard	doc/scripting/lib.scripting.QtClipboard-class.html	/^          <td><span class="summary-sig"><a name="__fillClipboard"><\/a><span class="summary-sig-name">__fillClipboard<\/span>(<span class="summary-sig-arg">self<\/span>,$/;"	a
+ __fillClipboard	lib/autokey/interface.py	/^    def __fillClipboard(self, string):$/;"	m	class:XInterfaceBase	file:
+ __fillClipboard	lib/autokey/scripting.py	/^    def __fillClipboard(self, string):$/;"	m	class:QtClipboard	file:
++__fillSelection	.pc/bionic_build_env_fix_1/lib/autokey/interface.py	/^    def __fillSelection(self, string):$/;"	m	class:XInterfaceBase	file:
+ __fillSelection	doc/scripting/lib.scripting.GtkClipboard-class.html	/^          <td><span class="summary-sig"><a name="__fillSelection"><\/a><span class="summary-sig-name">__fillSelection<\/span>(<span class="summary-sig-arg">self<\/span>,$/;"	a
+ __fillSelection	doc/scripting/lib.scripting.QtClipboard-class.html	/^          <td><span class="summary-sig"><a name="__fillSelection"><\/a><span class="summary-sig-name">__fillSelection<\/span>(<span class="summary-sig-arg">self<\/span>,$/;"	a
+ __fillSelection	lib/autokey/interface.py	/^    def __fillSelection(self, string):$/;"	m	class:XInterfaceBase	file:
+ __fillSelection	lib/autokey/scripting.py	/^    def __fillSelection(self, string):$/;"	m	class:GtkClipboard	file:
+ __fillSelection	lib/autokey/scripting.py	/^    def __fillSelection(self, string):$/;"	m	class:QtClipboard	file:
+ __findItem	lib/autokey/service.py	/^    def __findItem(self, name, objType, typeDescription):$/;"	m	class:Service	file:
++__findUsableKeycode	.pc/bionic_build_env_fix_1/lib/autokey/interface.py	/^    def __findUsableKeycode(self, codeList):$/;"	m	class:XInterfaceBase	file:
+ __findUsableKeycode	lib/autokey/interface.py	/^    def __findUsableKeycode(self, codeList):$/;"	m	class:XInterfaceBase	file:
++__flush	.pc/bionic_build_env_fix_1/lib/autokey/interface.py	/^    def __flush(self):$/;"	m	class:XInterfaceBase	file:
+ __flush	lib/autokey/interface.py	/^    def __flush(self):$/;"	m	class:XInterfaceBase	file:
++__flushEvents	.pc/bionic_build_env_fix_1/lib/autokey/interface.py	/^    def __flushEvents(self):$/;"	m	class:XInterfaceBase	file:
+ __flushEvents	lib/autokey/interface.py	/^    def __flushEvents(self):$/;"	m	class:XInterfaceBase	file:
+ __ge__	lib/autokey/qtui/configwindow.py	/^    def __ge__(self, other):$/;"	m	class:FolderWidgetItem	file:
+ __ge__	lib/autokey/qtui/configwindow.py	/^    def __ge__(self, other):$/;"	m	class:PhraseWidgetItem	file:
+@@ -1703,25 +1731,37 @@ __getSelection	doc/scripting/lib.scripti
+ __getSelection	lib/autokey/qtui/configwindow.py	/^    def __getSelection(self):$/;"	m	class:CentralWidget	file:
+ __getSelection	lib/autokey/scripting.py	/^    def __getSelection(self):$/;"	m	class:QtClipboard	file:
+ __getTreeSelection	lib/autokey/gtkui/configwindow.py	/^    def __getTreeSelection(self):$/;"	m	class:ConfigWindow	file:
++__getWinClass	.pc/bionic_build_env_fix_1/lib/autokey/interface.py	/^    def __getWinClass(self, windowvar, traverse):$/;"	m	class:XInterfaceBase	file:
+ __getWinClass	lib/autokey/interface.py	/^    def __getWinClass(self, windowvar, traverse):$/;"	m	class:XInterfaceBase	file:
++__getWinTitle	.pc/bionic_build_env_fix_1/lib/autokey/interface.py	/^    def __getWinTitle(self, windowvar, traverse):$/;"	m	class:XInterfaceBase	file:
+ __getWinTitle	lib/autokey/interface.py	/^    def __getWinTitle(self, windowvar, traverse):$/;"	m	class:XInterfaceBase	file:
+ __getattr__	lib/autokey/gtkui/configwindow.py	/^    def __getattr__(self, attr):$/;"	m	class:ConfigWindow	file:
+ __getattr__	lib/autokey/gtkui/configwindow.py	/^    def __getattr__(self, attr):$/;"	m	class:RenameDialog	file:
+ __getattr__	lib/autokey/gtkui/configwindow.py	/^    def __getattr__(self, attr):$/;"	m	class:SettingsWidget	file:
+ __getattr__	lib/autokey/gtkui/dialogs.py	/^    def __getattr__(self, attr):$/;"	m	class:DialogBase	file:
+ __getattr__	lib/autokey/gtkui/settingsdialog.py	/^    def __getattr__(self, attr):$/;"	m	class:SettingsDialog	file:
++__grabHotkey	.pc/bionic_build_env_fix_1/lib/autokey/interface.py	/^    def __grabHotkey(self, key, modifiers, window):$/;"	m	class:XInterfaceBase	file:
+ __grabHotkey	lib/autokey/interface.py	/^    def __grabHotkey(self, key, modifiers, window):$/;"	m	class:XInterfaceBase	file:
++__grabHotkeys	.pc/bionic_build_env_fix_1/lib/autokey/interface.py	/^    def __grabHotkeys(self):$/;"	m	class:XInterfaceBase	file:
+ __grabHotkeys	lib/autokey/interface.py	/^    def __grabHotkeys(self):$/;"	m	class:XInterfaceBase	file:
++__grabHotkeysForWindow	.pc/bionic_build_env_fix_1/lib/autokey/interface.py	/^    def __grabHotkeysForWindow(self, window):$/;"	m	class:XInterfaceBase	file:
+ __grabHotkeysForWindow	lib/autokey/interface.py	/^    def __grabHotkeysForWindow(self, window):$/;"	m	class:XInterfaceBase	file:
++__grabRecurse	.pc/bionic_build_env_fix_1/lib/autokey/interface.py	/^    def __grabRecurse(self, item, parent, checkWinInfo=True):$/;"	m	class:XInterfaceBase	file:
+ __grabRecurse	lib/autokey/interface.py	/^    def __grabRecurse(self, item, parent, checkWinInfo=True):$/;"	m	class:XInterfaceBase	file:
++__grab_keyboard	.pc/bionic_build_env_fix_1/lib/autokey/interface.py	/^    def __grab_keyboard(self):$/;"	m	class:XInterfaceBase	file:
+ __grab_keyboard	lib/autokey/interface.py	/^    def __grab_keyboard(self):$/;"	m	class:XInterfaceBase	file:
++__handleKeyPress	.pc/bionic_build_env_fix_1/lib/autokey/interface.py	/^    def __handleKeyPress(self, keyCode):$/;"	m	class:XInterfaceBase	file:
+ __handleKeyPress	lib/autokey/interface.py	/^    def __handleKeyPress(self, keyCode):$/;"	m	class:XInterfaceBase	file:
++__handleKeyrelease	.pc/bionic_build_env_fix_1/lib/autokey/interface.py	/^    def __handleKeyrelease(self, keyCode):$/;"	m	class:XInterfaceBase	file:
+ __handleKeyrelease	lib/autokey/interface.py	/^    def __handleKeyrelease(self, keyCode):$/;"	m	class:XInterfaceBase	file:
++__handleMouseclick	.pc/bionic_build_env_fix_1/lib/autokey/interface.py	/^    def __handleMouseclick(self, button, x, y):        $/;"	m	class:XInterfaceBase	file:
+ __handleMouseclick	lib/autokey/interface.py	/^    def __handleMouseclick(self, button, x, y):$/;"	m	class:XInterfaceBase	file:
+ __haveMatch	lib/autokey/service.py	/^    def __haveMatch(self, data):$/;"	m	class:Service	file:
++__initMappings	.pc/bionic_build_env_fix_1/lib/autokey/interface.py	/^    def __initMappings(self):$/;"	m	class:XInterfaceBase	file:
+ __initMappings	lib/autokey/interface.py	/^    def __initMappings(self):$/;"	m	class:XInterfaceBase	file:
+ __initStack	lib/autokey/gtkui/configwindow.py	/^    def __initStack(self):$/;"	m	class:ConfigWindow	file:
+ __initTreeWidget	lib/autokey/gtkui/configwindow.py	/^    def __initTreeWidget(self):$/;"	m	class:ConfigWindow	file:
++__init__	.pc/bionic_build_env_fix_1/lib/autokey/interface.py	/^    def __init__(self, mediator, app):$/;"	m	class:XInterfaceBase
+ __init__	doc/scripting/lib.scripting.Engine-class.html	/^          <td><span class="summary-sig"><a name="__init__"><\/a><span class="summary-sig-name">__init__<\/span>(<span class="summary-sig-arg">self<\/span>,$/;"	a
+ __init__	doc/scripting/lib.scripting.GtkClipboard-class.html	/^          <td><span class="summary-sig"><a name="__init__"><\/a><span class="summary-sig-name">__init__<\/span>(<span class="summary-sig-arg">self<\/span>,$/;"	a
+ __init__	doc/scripting/lib.scripting.Keyboard-class.html	/^          <td><span class="summary-sig"><a name="__init__"><\/a><span class="summary-sig-name">__init__<\/span>(<span class="summary-sig-arg">self<\/span>,$/;"	a
+@@ -1813,27 +1853,37 @@ __init__	lib/autokey/service.py	/^    de
+ __itemSelected	lib/autokey/gtkui/popupmenu.py	/^    def __itemSelected(self, widget, item):$/;"	m	class:PopupMenu	file:
+ __loadHotkey	lib/autokey/gtkui/settingsdialog.py	/^    def __loadHotkey(self, item, label, dialog, clearButton):$/;"	m	class:SettingsDialog	file:
+ __loadHotkey	lib/autokey/qtui/settingsdialog.py	/^    def __loadHotkey(self, item, label, dialog, clearButton):$/;"	m	class:SpecialHotkeySettings	file:
++__lookupKeyCode	.pc/bionic_build_env_fix_1/lib/autokey/interface.py	/^    def __lookupKeyCode(self, char):$/;"	m	class:XInterfaceBase	file:
+ __lookupKeyCode	lib/autokey/interface.py	/^    def __lookupKeyCode(self, char):$/;"	m	class:XInterfaceBase	file:
+ __lt__	lib/autokey/qtui/configwindow.py	/^    def __lt__(self, other):$/;"	m	class:FolderWidgetItem	file:
+ __lt__	lib/autokey/qtui/configwindow.py	/^    def __lt__(self, other):$/;"	m	class:PhraseWidgetItem	file:
+ __lt__	lib/autokey/qtui/configwindow.py	/^    def __lt__(self, other):$/;"	m	class:ScriptWidgetItem	file:
+ __menuRequired	lib/autokey/service.py	/^    def __menuRequired(self, folders, items, buffer):$/;"	m	class:Service	file:
+ __moveRecurseUpdate	lib/autokey/qtui/configwindow.py	/^    def __moveRecurseUpdate(self, folder):$/;"	m	class:CentralWidget	file:
++__needsMutterWorkaround	.pc/bionic_build_env_fix_1/lib/autokey/interface.py	/^    def __needsMutterWorkaround(self, item):$/;"	m	class:XInterfaceBase	file:
+ __needsMutterWorkaround	lib/autokey/interface.py	/^    def __needsMutterWorkaround(self, item):$/;"	m	class:XInterfaceBase	file:
+ __package__	doc/scripting/lib.scripting-module.html	/^        <a name="__package__"><\/a><span class="summary-name">__package__<\/span> = <code title="'lib'"><code class="variable-quote">'<\/code><code class="variable-string">lib<\/code><code class="variable-quote">'<\/code><\/code>$/;"	a
+ __popupMenu	lib/autokey/gtkui/configwindow.py	/^    def __popupMenu(self, event):$/;"	m	class:ConfigWindow	file:
++__pressKey	.pc/bionic_build_env_fix_1/lib/autokey/interface.py	/^    def __pressKey(self, keyName):$/;"	m	class:XInterfaceBase	file:
+ __pressKey	lib/autokey/interface.py	/^    def __pressKey(self, keyName):$/;"	m	class:XInterfaceBase	file:
++__processEvent	.pc/bionic_build_env_fix_1/lib/autokey/interface.py	/^    def __processEvent(self, reply):$/;"	m	class:XRecordInterface	file:
+ __processEvent	lib/autokey/interface.py	/^    def __processEvent(self, reply):$/;"	m	class:XRecordInterface	file:
+ __processFolder	lib/autokey/configmanager.py	/^    def __processFolder(self, parentFolder):        $/;"	m	class:ConfigManager	file:
+ __processItem	lib/autokey/service.py	/^    def __processItem(self, item, buffer=''):$/;"	m	class:Service	file:
++__processKeyEvent	.pc/bionic_build_env_fix_1/lib/autokey/interface.py	/^    def __processKeyEvent(self, event):$/;"	m	class:AtSpiInterface	file:
+ __processKeyEvent	lib/autokey/interface.py	/^    def __processKeyEvent(self, event):$/;"	m	class:AtSpiInterface	file:
++__processMouseEvent	.pc/bionic_build_env_fix_1/lib/autokey/interface.py	/^    def __processMouseEvent(self, event):$/;"	m	class:AtSpiInterface	file:
+ __processMouseEvent	lib/autokey/interface.py	/^    def __processMouseEvent(self, event):$/;"	m	class:AtSpiInterface	file:
++__pumpEvents	.pc/bionic_build_env_fix_1/lib/autokey/interface.py	/^    def __pumpEvents(self):$/;"	m	class:AtSpiInterface	file:
+ __pumpEvents	lib/autokey/interface.py	/^    def __pumpEvents(self):$/;"	m	class:AtSpiInterface	file:
+ __reapplyModifiers	lib/autokey/iomediator/_iomediator.py	/^    def __reapplyModifiers(self):$/;"	m	class:IoMediator	file:
+ __receive	doc/scripting/lib.scripting.GtkClipboard-class.html	/^          <td><span class="summary-sig"><a name="__receive"><\/a><span class="summary-sig-name">__receive<\/span>(<span class="summary-sig-arg">self<\/span>,$/;"	a
+ __receiveWindowInfo	lib/autokey/qtui/dialogs.py	/^    def __receiveWindowInfo(self, info):$/;"	m	class:WindowFilterSettingsDialog	file:
++__recurseTree	.pc/bionic_build_env_fix_1/lib/autokey/interface.py	/^    def __recurseTree(self, parent, hotkeys):$/;"	m	class:XInterfaceBase	file:
+ __recurseTree	lib/autokey/interface.py	/^    def __recurseTree(self, parent, hotkeys):$/;"	m	class:XInterfaceBase	file:
++__recurseTreeUngrab	.pc/bionic_build_env_fix_1/lib/autokey/interface.py	/^    def __recurseTreeUngrab(self, parent, hotkeys):$/;"	m	class:XInterfaceBase	file:
+ __recurseTreeUngrab	lib/autokey/interface.py	/^    def __recurseTreeUngrab(self, parent, hotkeys):$/;"	m	class:XInterfaceBase	file:
++__releaseKey	.pc/bionic_build_env_fix_1/lib/autokey/interface.py	/^    def __releaseKey(self, keyName):$/;"	m	class:XInterfaceBase	file:
+ __releaseKey	lib/autokey/interface.py	/^    def __releaseKey(self, keyName):$/;"	m	class:XInterfaceBase	file:
+ __removeItem	lib/autokey/gtkui/configwindow.py	/^    def __removeItem(self, model, item):$/;"	m	class:ConfigWindow	file:
+ __removeItem	lib/autokey/qtui/configwindow.py	/^    def __removeItem(self, widgetItem):$/;"	m	class:CentralWidget	file:
+@@ -1842,6 +1892,7 @@ __repr__	lib/autokey/model.py	/^    def
+ __repr__	lib/autokey/model.py	/^    def __repr__(self):$/;"	m	class:Script	file:
+ __resetWordCharCombo	lib/autokey/gtkui/dialogs.py	/^    def __resetWordCharCombo(self):$/;"	m	class:AbbrSettingsDialog	file:
+ __resetWordCharCombo	lib/autokey/qtui/dialogs.py	/^    def __resetWordCharCombo(self):$/;"	m	class:AbbrSettingsDialog	file:
++__restoreClipboard	.pc/bionic_build_env_fix_1/lib/autokey/interface.py	/^    def __restoreClipboard(self):$/;"	m	class:XInterfaceBase	file:
+ __restoreClipboard	lib/autokey/interface.py	/^    def __restoreClipboard(self):$/;"	m	class:XInterfaceBase	file:
+ __runKdialog	doc/scripting/lib.scripting.QtDialog-class.html	/^          <td><span class="summary-sig"><a name="__runKdialog"><\/a><span class="summary-sig-name">__runKdialog<\/span>(<span class="summary-sig-arg">self<\/span>,$/;"	a
+ __runKdialog	lib/autokey/scripting.py	/^    def __runKdialog(self, title, args, kwargs):$/;"	m	class:QtDialog	file:
+@@ -1851,14 +1902,23 @@ __runWmctrl	doc/scripting/lib.scripting.
+ __runWmctrl	lib/autokey/scripting.py	/^    def __runWmctrl(self, args):$/;"	m	class:Window	file:
+ __runZenity	doc/scripting/lib.scripting.GtkDialog-class.html	/^          <td><span class="summary-sig"><a name="__runZenity"><\/a><span class="summary-sig-name">__runZenity<\/span>(<span class="summary-sig-arg">self<\/span>,$/;"	a
+ __runZenity	lib/autokey/scripting.py	/^    def __runZenity(self, title, args, kwargs):$/;"	m	class:GtkDialog	file:
++__sendKey	.pc/bionic_build_env_fix_1/lib/autokey/interface.py	/^    def __sendKey(self, keyName):$/;"	m	class:XInterfaceBase	file:
+ __sendKey	lib/autokey/interface.py	/^    def __sendKey(self, keyName):$/;"	m	class:XInterfaceBase	file:
++__sendKeyCode	.pc/bionic_build_env_fix_1/lib/autokey/interface.py	/^    def __sendKeyCode(self, keyCode, modifiers=0, theWindow=None):$/;"	m	class:XInterfaceBase	file:
+ __sendKeyCode	lib/autokey/interface.py	/^    def __sendKeyCode(self, keyCode, modifiers=0, theWindow=None):$/;"	m	class:XInterfaceBase	file:
++__sendKeyPressEvent	.pc/bionic_build_env_fix_1/lib/autokey/interface.py	/^    def __sendKeyPressEvent(self, keyCode, modifiers, theWindow=None):$/;"	m	class:XInterfaceBase	file:
+ __sendKeyPressEvent	lib/autokey/interface.py	/^    def __sendKeyPressEvent(self, keyCode, modifiers, theWindow=None):$/;"	m	class:XInterfaceBase	file:
++__sendKeyReleaseEvent	.pc/bionic_build_env_fix_1/lib/autokey/interface.py	/^    def __sendKeyReleaseEvent(self, keyCode, modifiers, theWindow=None):$/;"	m	class:XInterfaceBase	file:
+ __sendKeyReleaseEvent	lib/autokey/interface.py	/^    def __sendKeyReleaseEvent(self, keyCode, modifiers, theWindow=None):$/;"	m	class:XInterfaceBase	file:
++__sendModifiedKey	.pc/bionic_build_env_fix_1/lib/autokey/interface.py	/^    def __sendModifiedKey(self, keyName, modifiers):$/;"	m	class:XInterfaceBase	file:
+ __sendModifiedKey	lib/autokey/interface.py	/^    def __sendModifiedKey(self, keyName, modifiers):$/;"	m	class:XInterfaceBase	file:
++__sendMouseClick	.pc/bionic_build_env_fix_1/lib/autokey/interface.py	/^    def __sendMouseClick(self, xCoord, yCoord, button, relative):    $/;"	m	class:XInterfaceBase	file:
+ __sendMouseClick	lib/autokey/interface.py	/^    def __sendMouseClick(self, xCoord, yCoord, button, relative):$/;"	m	class:XInterfaceBase	file:
++__sendMouseClickRelative	.pc/bionic_build_env_fix_1/lib/autokey/interface.py	/^    def __sendMouseClickRelative(self, xoff, yoff, button):$/;"	m	class:XInterfaceBase	file:
+ __sendMouseClickRelative	lib/autokey/interface.py	/^    def __sendMouseClickRelative(self, xoff, yoff, button):$/;"	m	class:XInterfaceBase	file:
++__sendString	.pc/bionic_build_env_fix_1/lib/autokey/interface.py	/^    def __sendString(self, string):$/;"	m	class:XInterfaceBase	file:
+ __sendString	lib/autokey/interface.py	/^    def __sendString(self, string):$/;"	m	class:XInterfaceBase	file:
++__sendStringClipboard	.pc/bionic_build_env_fix_1/lib/autokey/interface.py	/^    def __sendStringClipboard(self, string, pasteCommand):$/;"	m	class:XInterfaceBase	file:
+ __sendStringClipboard	lib/autokey/interface.py	/^    def __sendStringClipboard(self, string, pasteCommand):$/;"	m	class:XInterfaceBase	file:
+ __shouldProcess	lib/autokey/service.py	/^    def __shouldProcess(self, windowInfo):$/;"	m	class:Service	file:
+ __str__	lib/autokey/configmanager.py	/^    def __str__(self):$/;"	m	class:GlobalHotkey	file:
+@@ -1866,9 +1926,13 @@ __str__	lib/autokey/model.py	/^    def _
+ __str__	lib/autokey/model.py	/^    def __str__(self):$/;"	m	class:Phrase	file:
+ __str__	lib/autokey/model.py	/^    def __str__(self):$/;"	m	class:Script	file:
+ __tryReleaseLock	lib/autokey/service.py	/^    def __tryReleaseLock(self):$/;"	m	class:Service	file:
++__ungrabAllHotkeys	.pc/bionic_build_env_fix_1/lib/autokey/interface.py	/^    def __ungrabAllHotkeys(self):$/;"	m	class:XInterfaceBase	file:
+ __ungrabAllHotkeys	lib/autokey/interface.py	/^    def __ungrabAllHotkeys(self):$/;"	m	class:XInterfaceBase	file:
++__ungrabHotkey	.pc/bionic_build_env_fix_1/lib/autokey/interface.py	/^    def __ungrabHotkey(self, key, modifiers, window):$/;"	m	class:XInterfaceBase	file:
+ __ungrabHotkey	lib/autokey/interface.py	/^    def __ungrabHotkey(self, key, modifiers, window):$/;"	m	class:XInterfaceBase	file:
++__ungrabKeyboard	.pc/bionic_build_env_fix_1/lib/autokey/interface.py	/^    def __ungrabKeyboard(self):$/;"	m	class:XInterfaceBase	file:
+ __ungrabKeyboard	lib/autokey/interface.py	/^    def __ungrabKeyboard(self):$/;"	m	class:XInterfaceBase	file:
++__ungrabRecurse	.pc/bionic_build_env_fix_1/lib/autokey/interface.py	/^    def __ungrabRecurse(self, item, parent, checkWinInfo=True):$/;"	m	class:XInterfaceBase	file:
+ __ungrabRecurse	lib/autokey/interface.py	/^    def __ungrabRecurse(self, item, parent, checkWinInfo=True):$/;"	m	class:XInterfaceBase	file:
+ __unsuspend	lib/autokey/monitor.py	/^    def __unsuspend(self):$/;"	m	class:FileMonitor	file:
+ __updateStack	lib/autokey/service.py	/^    def __updateStack(self, key):$/;"	m	class:Service	file:
+@@ -1945,6 +2009,7 @@ apply_settings	lib/autokey/configmanager
+ author	setup.py	/^    author=R.AUTHOR,$/;"	v
+ author_email	setup.py	/^    author_email=R.AUTHOR_EMAIL,$/;"	v
+ auto_kill_doclink	doc/scripting/epydoc.js	/^function auto_kill_doclink(ev) {$/;"	f	function:function
++begin_send	.pc/bionic_build_env_fix_1/lib/autokey/interface.py	/^    def begin_send(self):$/;"	m	class:XInterfaceBase
+ begin_send	lib/autokey/interface.py	/^    def begin_send(self):$/;"	m	class:XInterfaceBase
+ build_menu	lib/autokey/qtui/notifier.py	/^    def build_menu(self):$/;"	m	class:Notifier
+ build_modifiers	lib/autokey/gtkui/dialogs.py	/^    def build_modifiers(self):$/;"	m	class:HotkeySettingsDialog
+@@ -1961,6 +2026,9 @@ calendar	doc/scripting/lib.scripting.QtD
+ calendar	lib/autokey/scripting.py	/^    def calendar(self, title="Choose a date", format_str="%Y-%m-%d", date="today", **kwargs):$/;"	m	class:GtkDialog
+ calendar	lib/autokey/scripting.py	/^    def calendar(self, title="Choose a date", format_str="%Y-%m-%d", date="today", **kwargs):$/;"	m	class:QtDialog
+ can_undo	lib/autokey/service.py	/^    def can_undo(self):$/;"	m	class:PhraseRunner
++cancel	.pc/bionic_build_env_fix_1/lib/autokey/interface.py	/^    def cancel(self):$/;"	m	class:AtSpiInterface
++cancel	.pc/bionic_build_env_fix_1/lib/autokey/interface.py	/^    def cancel(self):$/;"	m	class:XInterfaceBase
++cancel	.pc/bionic_build_env_fix_1/lib/autokey/interface.py	/^    def cancel(self):$/;"	m	class:XRecordInterface
+ cancel	lib/autokey/interface.py	/^    def cancel(self):$/;"	m	class:AtSpiInterface
+ cancel	lib/autokey/interface.py	/^    def cancel(self):$/;"	m	class:XInterfaceBase
+ cancel	lib/autokey/interface.py	/^    def cancel(self):$/;"	m	class:XRecordInterface
+@@ -2047,11 +2115,14 @@ execute	lib/autokey/service.py	/^    def
+ expand	doc/scripting/epydoc.js	/^function expand(id) {$/;"	f
+ expandto	doc/scripting/epydoc.js	/^function expandto(href) {$/;"	f	function:function
+ extract_wordchars	lib/autokey/model.py	/^def extract_wordchars(regex):$/;"	f
++fake_keydown	.pc/bionic_build_env_fix_1/lib/autokey/interface.py	/^    def fake_keydown(self, keyName):$/;"	m	class:XInterfaceBase
+ fake_keydown	lib/autokey/interface.py	/^    def fake_keydown(self, keyName):$/;"	m	class:XInterfaceBase
++fake_keypress	.pc/bionic_build_env_fix_1/lib/autokey/interface.py	/^    def fake_keypress(self, keyName):$/;"	m	class:XInterfaceBase
+ fake_keypress	doc/scripting/lib.scripting.Keyboard-class.html	/^<a name="fake_keypress"><\/a>$/;"	a
+ fake_keypress	lib/autokey/interface.py	/^    def fake_keypress(self, keyName):$/;"	m	class:XInterfaceBase
+ fake_keypress	lib/autokey/iomediator/_iomediator.py	/^    def fake_keypress(self, keyName):$/;"	m	class:IoMediator
+ fake_keypress	lib/autokey/scripting.py	/^    def fake_keypress(self, key, repeat=1):$/;"	m	class:Keyboard
++fake_keyup	.pc/bionic_build_env_fix_1/lib/autokey/interface.py	/^    def fake_keyup(self, keyName):$/;"	m	class:XInterfaceBase
+ fake_keyup	lib/autokey/interface.py	/^    def fake_keyup(self, keyName):$/;"	m	class:XInterfaceBase
+ fill_clipboard	doc/scripting/lib.scripting.GtkClipboard-class.html	/^<a name="fill_clipboard"><\/a>$/;"	a
+ fill_clipboard	doc/scripting/lib.scripting.QtClipboard-class.html	/^<a name="fill_clipboard"><\/a>$/;"	a
+@@ -2062,7 +2133,9 @@ fill_selection	doc/scripting/lib.scripti
+ fill_selection	lib/autokey/scripting.py	/^    def fill_selection(self, contents):$/;"	m	class:GtkClipboard
+ fill_selection	lib/autokey/scripting.py	/^    def fill_selection(self, contents):$/;"	m	class:QtClipboard
+ filter_matches	lib/autokey/model.py	/^    def filter_matches(self, otherFilter):$/;"	m	class:AbstractWindowFilter
++finish_send	.pc/bionic_build_env_fix_1/lib/autokey/interface.py	/^    def finish_send(self):$/;"	m	class:XInterfaceBase
+ finish_send	lib/autokey/interface.py	/^    def finish_send(self):$/;"	m	class:XInterfaceBase
++flush	.pc/bionic_build_env_fix_1/lib/autokey/interface.py	/^    def flush(self):$/;"	m	class:XInterfaceBase
+ flush	lib/autokey/interface.py	/^    def flush(self):$/;"	m	class:XInterfaceBase
+ flush	lib/autokey/iomediator/_iomediator.py	/^    def flush(self):$/;"	m	class:IoMediator
+ flush	lib/autokey/qtui/configwindow.py	/^    def flush(self):$/;"	m	class:ListWidgetHandler
+@@ -2143,11 +2216,16 @@ get_update_fs	lib/autokey/gtkui/configwi
+ get_value	doc/scripting/lib.scripting.Store-class.html	/^<a name="get_value"><\/a>$/;"	a
+ get_value	lib/autokey/scripting_Store.py	/^    def get_value(self, key):$/;"	m	class:Store
+ get_value_or_default	lib/autokey/model.py	/^def get_value_or_default(jsonData, key, default):$/;"	f
++get_window_class	.pc/bionic_build_env_fix_1/lib/autokey/interface.py	/^    def get_window_class(self, window=None, traverse=True):$/;"	m	class:XInterfaceBase
+ get_window_class	lib/autokey/interface.py	/^    def get_window_class(self, window=None, traverse=True):$/;"	m	class:XInterfaceBase
++get_window_title	.pc/bionic_build_env_fix_1/lib/autokey/interface.py	/^    def get_window_title(self, window=None, traverse=True):$/;"	m	class:XInterfaceBase
+ get_window_title	lib/autokey/interface.py	/^    def get_window_title(self, window=None, traverse=True):$/;"	m	class:XInterfaceBase
+ get_word_chars	lib/autokey/model.py	/^    def get_word_chars(self):$/;"	m	class:AbstractAbbreviation
++grab_hotkey	.pc/bionic_build_env_fix_1/lib/autokey/interface.py	/^    def grab_hotkey(self, item):$/;"	m	class:XInterfaceBase
+ grab_hotkey	lib/autokey/interface.py	/^    def grab_hotkey(self, item):$/;"	m	class:XInterfaceBase
++grab_keyboard	.pc/bionic_build_env_fix_1/lib/autokey/interface.py	/^    def grab_keyboard(self):$/;"	m	class:XInterfaceBase
+ grab_keyboard	lib/autokey/interface.py	/^    def grab_keyboard(self):$/;"	m	class:XInterfaceBase
++handle_keypress	.pc/bionic_build_env_fix_1/lib/autokey/interface.py	/^    def handle_keypress(self, keyCode):$/;"	m	class:XInterfaceBase
+ handle_keypress	lib/autokey/interface.py	/^    def handle_keypress(self, keyCode):$/;"	m	class:XInterfaceBase
+ handle_keypress	lib/autokey/iomediator/_iomediator.py	/^    def handle_keypress(self, keyCode, windowName, windowClass):$/;"	m	class:IoMediator
+ handle_keypress	lib/autokey/iomediator/_keygrabber.py	/^    def handle_keypress(self, rawKey, modifiers, key, *args):$/;"	m	class:KeyGrabber
+@@ -2156,10 +2234,12 @@ handle_keypress	lib/autokey/iomediator/_
+ handle_keypress	lib/autokey/iomediator/_windowgrabber.py	/^    def handle_keypress(self, rawKey, modifiers, key, *args):$/;"	m	class:WindowGrabber
+ handle_keypress	lib/autokey/service.py	/^    def handle_keypress(self, rawKey, modifiers, key, windowName, windowClass):$/;"	m	class:Service
+ handle_keypress	test/interfacetest.py	/^    def handle_keypress(self, key):$/;"	m	class:MockService
++handle_keyrelease	.pc/bionic_build_env_fix_1/lib/autokey/interface.py	/^    def handle_keyrelease(self, keyCode):$/;"	m	class:XInterfaceBase
+ handle_keyrelease	lib/autokey/interface.py	/^    def handle_keyrelease(self, keyCode):$/;"	m	class:XInterfaceBase
+ handle_modifier_down	lib/autokey/iomediator/_iomediator.py	/^    def handle_modifier_down(self, modifier):$/;"	m	class:IoMediator
+ handle_modifier_up	lib/autokey/iomediator/_iomediator.py	/^    def handle_modifier_up(self, modifier):$/;"	m	class:IoMediator
+ handle_mouse_click	lib/autokey/iomediator/_iomediator.py	/^    def handle_mouse_click(self, rootX, rootY, relX, relY, button, windowInfo):$/;"	m	class:IoMediator
++handle_mouseclick	.pc/bionic_build_env_fix_1/lib/autokey/interface.py	/^    def handle_mouseclick(self, button, x, y):$/;"	m	class:XInterfaceBase
+ handle_mouseclick	lib/autokey/interface.py	/^    def handle_mouseclick(self, button, x, y):$/;"	m	class:XInterfaceBase
+ handle_mouseclick	lib/autokey/iomediator/_keygrabber.py	/^    def handle_mouseclick(self, rootX, rootY, relX, relY, button, windowInfo):$/;"	m	class:KeyGrabber
+ handle_mouseclick	lib/autokey/iomediator/_keygrabber.py	/^    def handle_mouseclick(self, rootX, rootY, relX, relY, button, windowInfo):$/;"	m	class:Recorder
+@@ -2186,6 +2266,8 @@ info_dialog	lib/autokey/scripting.py	/^
+ inherits_filter	lib/autokey/model.py	/^    def inherits_filter(self):$/;"	m	class:AbstractWindowFilter
+ init_global_hotkeys	lib/autokey/gtkapp.py	/^    def init_global_hotkeys(self, configManager):$/;"	m	class:Application
+ init_global_hotkeys	lib/autokey/qtapp.py	/^    def init_global_hotkeys(self, configManager):$/;"	m	class:Application
++initialise	.pc/bionic_build_env_fix_1/lib/autokey/interface.py	/^    def initialise(self):$/;"	m	class:AtSpiInterface
++initialise	.pc/bionic_build_env_fix_1/lib/autokey/interface.py	/^    def initialise(self):$/;"	m	class:XRecordInterface
+ initialise	lib/autokey/gtkapp.py	/^    def initialise(self, configure):$/;"	m	class:Application
+ initialise	lib/autokey/interface.py	/^    def initialise(self):$/;"	m	class:AtSpiInterface
+ initialise	lib/autokey/interface.py	/^    def initialise(self):$/;"	m	class:XRecordInterface
+@@ -2211,6 +2293,7 @@ is_running	lib/autokey/service.py	/^
+ is_suspended	lib/autokey/monitor.py	/^    def is_suspended(self):$/;"	m	class:FileMonitor
+ item_selected	lib/autokey/service.py	/^    def item_selected(self, item):$/;"	m	class:Service
+ keyPressEvent	lib/autokey/qtui/configwindow.py	/^    def keyPressEvent(self, event):$/;"	m	class:AkTreeWidget
++keymap_test	.pc/bionic_build_env_fix_1/lib/autokey/interface.py	/^    def keymap_test(self):$/;"	m	class:XInterfaceBase
+ keymap_test	lib/autokey/interface.py	/^    def keymap_test(self):$/;"	m	class:XInterfaceBase
+ kill_doclink	doc/scripting/epydoc.js	/^function kill_doclink(id) {$/;"	f	function:function
+ license	setup.py	/^    license='GPLv3',$/;"	v
+@@ -2253,8 +2336,10 @@ load_from_serialized	lib/autokey/model.p
+ load_from_serialized	lib/autokey/model.py	/^    def load_from_serialized(self, data):$/;"	m	class:AbstractHotkey
+ load_from_serialized	lib/autokey/model.py	/^    def load_from_serialized(self, data):$/;"	m	class:AbstractWindowFilter
+ load_global_config	lib/autokey/configmanager.py	/^    def load_global_config(self):$/;"	m	class:ConfigManager
++logger	.pc/bionic_build_env_fix_1/lib/autokey/interface.py	/^logger = logging.getLogger("interface")$/;"	v
+ logger	lib/autokey/interface.py	/^logger = logging.getLogger("interface")$/;"	v
+ logger	lib/autokey/service.py	/^logger = logging.getLogger("service")$/;"	v
++lookup_string	.pc/bionic_build_env_fix_1/lib/autokey/interface.py	/^    def lookup_string(self, keyCode, shifted, numlock, altGrid):$/;"	m	class:XInterfaceBase
+ lookup_string	lib/autokey/interface.py	/^    def lookup_string(self, keyCode, shifted, numlock, altGrid):$/;"	m	class:XInterfaceBase
+ m	lib/autokey/monitor.py	/^m = EventsCodes.OP_FLAGS$/;"	v
+ main	lib/autokey/gtkapp.py	/^    def main(self):$/;"	m	class:Application
+@@ -2338,6 +2423,7 @@ on_immediateCheckbox_stateChanged	lib/au
+ on_immediateCheckbox_stateChanged	lib/autokey/qtui/dialogs.py	/^    def on_immediateCheckbox_stateChanged(self, state):$/;"	m	class:AbbrSettings
+ on_insert_macro	lib/autokey/gtkui/configwindow.py	/^    def on_insert_macro(self, widget, macro):$/;"	m	class:ConfigWindow
+ on_insert_macro	lib/autokey/qtui/configwindow.py	/^    def on_insert_macro(self, macro):$/;"	m	class:ConfigWindow
++on_keys_changed	.pc/bionic_build_env_fix_1/lib/autokey/interface.py	/^    def on_keys_changed(self, data=None):$/;"	m	class:XInterfaceBase
+ on_keys_changed	lib/autokey/interface.py	/^    def on_keys_changed(self, data=None):$/;"	m	class:XInterfaceBase
+ on_matchCaseCheckbox_stateChanged	lib/autokey/gtkui/dialogs.py	/^    def on_matchCaseCheckbox_stateChanged(self, widget, data=None):$/;"	m	class:AbbrSettingsDialog
+ on_matchCaseCheckbox_stateChanged	lib/autokey/qtui/dialogs.py	/^    def on_matchCaseCheckbox_stateChanged(self, state):$/;"	m	class:AbbrSettings
+@@ -2469,6 +2555,7 @@ populate	lib/autokey/qtui/dialogs.py	/^
+ populate_store	lib/autokey/gtkui/configwindow.py	/^    def populate_store(self, parent, parentFolder):$/;"	m	class:AkTreeModel
+ populate_tree	lib/autokey/qtui/configwindow.py	/^    def populate_tree(self, config):$/;"	m	class:CentralWidget
+ postEventWithCallback	lib/autokey/qtapp.py	/^    def postEventWithCallback(self, callback, *args):$/;"	m	class:CallbackEventHandler
++press_key	.pc/bionic_build_env_fix_1/lib/autokey/interface.py	/^    def press_key(self, keyName):$/;"	m	class:XInterfaceBase
+ press_key	doc/scripting/lib.scripting.Keyboard-class.html	/^<a name="press_key"><\/a>$/;"	a
+ press_key	lib/autokey/interface.py	/^    def press_key(self, keyName):$/;"	m	class:XInterfaceBase
+ press_key	lib/autokey/iomediator/_iomediator.py	/^    def press_key(self, keyName):$/;"	m	class:IoMediator
+@@ -2506,6 +2593,7 @@ redo	lib/autokey/gtkui/configwindow.py	/
+ redo	lib/autokey/qtui/configwindow.py	/^    def redo(self):$/;"	m	class:PhrasePage
+ redo	lib/autokey/qtui/configwindow.py	/^    def redo(self):$/;"	m	class:ScriptPage
+ refresh_tree	lib/autokey/gtkui/configwindow.py	/^    def refresh_tree(self):$/;"	m	class:ConfigWindow
++release_key	.pc/bionic_build_env_fix_1/lib/autokey/interface.py	/^    def release_key(self, keyName):$/;"	m	class:XInterfaceBase
+ release_key	doc/scripting/lib.scripting.Keyboard-class.html	/^<a name="release_key"><\/a>$/;"	a
+ release_key	lib/autokey/interface.py	/^    def release_key(self, keyName):$/;"	m	class:XInterfaceBase
+ release_key	lib/autokey/iomediator/_iomediator.py	/^    def release_key(self, keyName):$/;"	m	class:IoMediator
+@@ -2555,6 +2643,7 @@ retranslateUi	lib/autokey/qtui/scriptpag
+ retranslateUi	lib/autokey/qtui/settingswidget.py	/^    def retranslateUi(self, SettingsWidget):$/;"	m	class:Ui_SettingsWidget
+ retranslateUi	lib/autokey/qtui/specialhotkeysettings.py	/^    def retranslateUi(self, Form):$/;"	m	class:Ui_Form
+ retranslateUi	lib/autokey/qtui/windowfiltersettings.py	/^    def retranslateUi(self, Form):$/;"	m	class:Ui_Form
++run	.pc/bionic_build_env_fix_1/lib/autokey/interface.py	/^    def run(self):$/;"	m	class:XRecordInterface
+ run	lib/autokey/interface.py	/^    def run(self):$/;"	m	class:XRecordInterface
+ run	lib/autokey/iomediator/_iomediator.py	/^    def run(self):$/;"	m	class:IoMediator
+ run	lib/autokey/monitor.py	/^    def run(self):        $/;"	m	class:FileMonitor
+@@ -2622,6 +2711,7 @@ section-MethodDetails	doc/scripting/lib.
+ section-Properties	doc/scripting/lib.scripting.Store-class.html	/^<a name="section-Properties"><\/a>$/;"	a
+ section-Variables	doc/scripting/lib.scripting-module.html	/^<a name="section-Variables"><\/a>$/;"	a
+ send_backspace	lib/autokey/iomediator/_iomediator.py	/^    def send_backspace(self, count):$/;"	m	class:IoMediator
++send_key	.pc/bionic_build_env_fix_1/lib/autokey/interface.py	/^    def send_key(self, keyName):$/;"	m	class:XInterfaceBase
+ send_key	doc/scripting/lib.scripting.Keyboard-class.html	/^<a name="send_key"><\/a>$/;"	a
+ send_key	lib/autokey/interface.py	/^    def send_key(self, keyName):$/;"	m	class:XInterfaceBase
+ send_key	lib/autokey/iomediator/_iomediator.py	/^    def send_key(self, keyName):$/;"	m	class:IoMediator
+@@ -2629,14 +2719,19 @@ send_key	lib/autokey/scripting.py	/^
+ send_keys	doc/scripting/lib.scripting.Keyboard-class.html	/^<a name="send_keys"><\/a>$/;"	a
+ send_keys	lib/autokey/scripting.py	/^    def send_keys(self, keyString):$/;"	m	class:Keyboard
+ send_left	lib/autokey/iomediator/_iomediator.py	/^    def send_left(self, count):$/;"	m	class:IoMediator
++send_modified_key	.pc/bionic_build_env_fix_1/lib/autokey/interface.py	/^    def send_modified_key(self, keyName, modifiers):$/;"	m	class:XInterfaceBase
+ send_modified_key	lib/autokey/interface.py	/^    def send_modified_key(self, keyName, modifiers):$/;"	m	class:XInterfaceBase
++send_mouse_click	.pc/bionic_build_env_fix_1/lib/autokey/interface.py	/^    def send_mouse_click(self, xCoord, yCoord, button, relative):$/;"	m	class:XInterfaceBase
+ send_mouse_click	lib/autokey/interface.py	/^    def send_mouse_click(self, xCoord, yCoord, button, relative):$/;"	m	class:XInterfaceBase
+ send_mouse_click	lib/autokey/iomediator/_iomediator.py	/^    def send_mouse_click(self, x, y, button, relative):$/;"	m	class:IoMediator
++send_mouse_click_relative	.pc/bionic_build_env_fix_1/lib/autokey/interface.py	/^    def send_mouse_click_relative(self, xoff, yoff, button):$/;"	m	class:XInterfaceBase
+ send_mouse_click_relative	lib/autokey/interface.py	/^    def send_mouse_click_relative(self, xoff, yoff, button):$/;"	m	class:XInterfaceBase
+ send_mouse_click_relative	lib/autokey/iomediator/_iomediator.py	/^    def send_mouse_click_relative(self, x, y, button):$/;"	m	class:IoMediator
+ send_right	lib/autokey/iomediator/_iomediator.py	/^    def send_right(self, count):$/;"	m	class:IoMediator
++send_string	.pc/bionic_build_env_fix_1/lib/autokey/interface.py	/^    def send_string(self, string):$/;"	m	class:XInterfaceBase
+ send_string	lib/autokey/interface.py	/^    def send_string(self, string):$/;"	m	class:XInterfaceBase
+ send_string	lib/autokey/iomediator/_iomediator.py	/^    def send_string(self, string: str):$/;"	m	class:IoMediator
++send_string_clipboard	.pc/bionic_build_env_fix_1/lib/autokey/interface.py	/^    def send_string_clipboard(self, string, pasteCommand):$/;"	m	class:XInterfaceBase
+ send_string_clipboard	lib/autokey/interface.py	/^    def send_string_clipboard(self, string, pasteCommand):$/;"	m	class:XInterfaceBase
+ send_up	lib/autokey/iomediator/_iomediator.py	/^    def send_up(self, count):$/;"	m	class:IoMediator
+ setData	lib/autokey/qtui/dialogs.py	/^    def setData(self, role, value):$/;"	m	class:AbbrListItem
+@@ -2733,6 +2828,7 @@ slotButtonClicked	lib/autokey/qtui/dialo
+ slotButtonClicked	lib/autokey/qtui/dialogs.py	/^    def slotButtonClicked(self, button):$/;"	m	class:RecordDialog
+ slotButtonClicked	lib/autokey/qtui/dialogs.py	/^    def slotButtonClicked(self, button):$/;"	m	class:WindowFilterSettingsDialog
+ slotButtonClicked	lib/autokey/qtui/settingsdialog.py	/^    def slotButtonClicked(self, button):$/;"	m	class:SettingsDialog
++start	.pc/bionic_build_env_fix_1/lib/autokey/interface.py	/^    def start(self):$/;"	m	class:AtSpiInterface
+ start	lib/autokey/interface.py	/^    def start(self):$/;"	m	class:AtSpiInterface
+ start	lib/autokey/iomediator/_keygrabber.py	/^    def start(self):$/;"	m	class:KeyGrabber
+ start	lib/autokey/iomediator/_keygrabber.py	/^    def start(self, delay):$/;"	m	class:Recorder
+@@ -2748,7 +2844,9 @@ start_withgrab	lib/autokey/iomediator/_k
+ stop	lib/autokey/iomediator/_keygrabber.py	/^    def stop(self):$/;"	m	class:Recorder
+ stop	lib/autokey/monitor.py	/^    def stop(self):$/;"	m	class:FileMonitor
+ stop_withgrab	lib/autokey/iomediator/_keygrabber.py	/^    def stop_withgrab(self):$/;"	m	class:Recorder
++str_or_bytes_to_bytes	.pc/bionic_build_env_fix_1/lib/autokey/interface.py	/^def str_or_bytes_to_bytes(x: Union[str, bytes, memoryview]) -> bytes:$/;"	f
+ str_or_bytes_to_bytes	lib/autokey/interface.py	/^def str_or_bytes_to_bytes(x: Union[str, bytes, memoryview]) -> bytes:$/;"	f
++str_or_bytes_to_str	.pc/bionic_build_env_fix_1/lib/autokey/interface.py	/^def str_or_bytes_to_str(x: Union[str, bytes]) -> str:$/;"	f
+ str_or_bytes_to_str	lib/autokey/interface.py	/^def str_or_bytes_to_str(x: Union[str, bytes]) -> str:$/;"	f
+ suspend	lib/autokey/monitor.py	/^    def suspend(self):$/;"	m	class:FileMonitor
+ switch_desktop	doc/scripting/lib.scripting.Window-class.html	/^<a name="switch_desktop"><\/a>$/;"	a
+@@ -2793,7 +2891,9 @@ undo	lib/autokey/gtkui/configwindow.py	/
+ undo	lib/autokey/qtui/configwindow.py	/^    def undo(self):$/;"	m	class:PhrasePage
+ undo	lib/autokey/qtui/configwindow.py	/^    def undo(self):$/;"	m	class:ScriptPage
+ undo_expansion	lib/autokey/service.py	/^    def undo_expansion(self):$/;"	m	class:PhraseRunner
++ungrab_hotkey	.pc/bionic_build_env_fix_1/lib/autokey/interface.py	/^    def ungrab_hotkey(self, item):$/;"	m	class:XInterfaceBase
+ ungrab_hotkey	lib/autokey/interface.py	/^    def ungrab_hotkey(self, item):$/;"	m	class:XInterfaceBase
++ungrab_keyboard	.pc/bionic_build_env_fix_1/lib/autokey/interface.py	/^    def ungrab_keyboard(self):$/;"	m	class:XInterfaceBase
+ ungrab_keyboard	lib/autokey/interface.py	/^    def ungrab_keyboard(self):$/;"	m	class:XInterfaceBase
+ unpause	lib/autokey/service.py	/^    def unpause(self):$/;"	m	class:Service
+ unpause_service	lib/autokey/gtkapp.py	/^    def unpause_service(self):$/;"	m	class:Application
