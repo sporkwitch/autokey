@@ -1,16 +1,76 @@
-Description: Fix build deps and env
- Add missing build deps
- Remove gtk version check
+Description: Fix trailing newlines
+ Integrate upstream fix for trailing newlines
  .
- autokey (0.94.1-0ubuntu1) bionic; urgency=medium
+ autokey (0.94.1-0ubuntu3) bionic; urgency=low
  .
-   * Initial bionic release of Troy C. autokey from
-     https://github.com/autokey/autokey
+   * Integrate upstream fix for trailing newlines
 Author: Robert Klebes <robert@klebes.info>
-Last-Update: 2018-05-13
+Last-Update: 2018-05-19
 
---- autokey-0.94.1.orig/lib/autokey/interface.py
-+++ autokey-0.94.1/lib/autokey/interface.py
+Index: autokey/README.rst
+===================================================================
+--- autokey.orig/README.rst
++++ autokey/README.rst
+@@ -51,7 +51,7 @@ QT frontend only:
+ - PyQt4
+ - PyKDE4
+ 
+-Manual install via pip
++Install via pip
+ ++++++++++++++++++++++
+ 
+ pip will automatically resolve and install dependencies, but dbus-python requires the dbus headers be present on your system. These are usually installed through your package manager, and usually are named dbus-devel or libdbus-dev or similar.
+@@ -60,18 +60,17 @@ pip will automatically resolve and insta
+ 
+    pip3 install autokey
+    # or, if you want the latest from this repository,
+-   pip3 install git+https://github.com/autokey/autokey
++   pip3 install --user git+https://github.com/autokey/autokey
+ 
+ The "--user" option for pip may be added to install for the current user only.
+ 
+ Ubuntu/Mint/Debian
+ ++++++++++++++++++
+-
+-Try the (experimental) PPA! Note that only Ubuntu 16.04, Mint 18, or above are supported for now as they supply Python 3.5 by default. Earlier versions of Python <= 3.4 require the ``typing`` module be installed separately.
++There is a repository available for Ubuntu 18.04 LTS (and compatible derivatives, such as Kubuntu):
+ 
+ .. code:: sh
+ 
+-   sudo add-apt-repository ppa:troxor/autokey
++   sudo add-apt-repository ppa:sporkwitch/autokey
+    sudo apt update
+    sudo apt install autokey-gtk
+ 
+@@ -85,6 +84,7 @@ Arch Linux
+ Available in the `AUR`_. Unfortunately, Arch has removed the kdebindings-python package, so only the GTK frontend is usable for now.
+ 
+ .. _AUR: https://aur.archlinux.org/packages/autokey-py3/ 
++
+ Gentoo
+ ++++++
+ 
+@@ -101,7 +101,15 @@ Available via layman_.
+ Fedora
+ ++++++
+ 
+-Build package using provided .spec file (may be outdated)
++Avaiable from Fedora_ 27 onwards.
++
++.. _Fedora: https://apps.fedoraproject.org/packages/autokey
++
++.. code:: sh
++
++   sudo dnf install autokey-gtk
++   # or for kde
++   sudo dnf install autokey-kde
+ 
+ Documentation
+ =============
+Index: autokey/lib/autokey/interface.py
+===================================================================
+--- autokey.orig/lib/autokey/interface.py
++++ autokey/lib/autokey/interface.py
 @@ -40,7 +40,6 @@ if common.USING_QT:
      from PyQt4.QtGui import QClipboard, QApplication
  else:
@@ -412,9 +472,56 @@ Last-Update: 2018-05-13
      def cancel(self):
          logger.debug("XInterfaceBase: Try to exit event thread.")
          self.queue.put_nowait((None, None))
+Index: autokey/lib/autokey/scripting.py
+===================================================================
+--- autokey.orig/lib/autokey/scripting.py
++++ autokey/lib/autokey/scripting.py
+@@ -422,15 +422,15 @@ class System:
+         @raise subprocess.CalledProcessError: if the command returns a non-zero exit code
+         """
+         if getOutput:
+-            p = subprocess.Popen(command, shell=True, bufsize=-1, stdout=subprocess.PIPE)
+-            output = p.communicate()[0].decode()
+-            retCode = p.returncode
+-            # possible deadlock if the code below is used, see http://docs.python.org/3/library/subprocess.html for more information
+-            # retCode = p.wait()
+-            # output = p.stdout.read()[:-1]
+-            if retCode != 0:
+-                raise subprocess.CalledProcessError(retCode, output)
+-            else:
++            with subprocess.Popen(
++                    command,
++                    shell=True,
++                    bufsize=-1,
++                    stdout=subprocess.PIPE,
++                    universal_newlines=True) as p:
++                output = p.communicate()[0][:-1]  # Drop the trailing newline character
++                if p.returncode:
++                    raise subprocess.CalledProcessError(p.returncode, output)
+                 return output
+         else:
+             subprocess.Popen(command, shell=True, bufsize=-1)
+@@ -444,11 +444,10 @@ class System:
+         @param fileName: full path to the file to be created
+         @param contents: contents to insert into the file
+         """
+-        f = open(fileName, "w")
+-        f.write(contents)
+-        f.close()
+-        
+-        
++        with open(fileName, "w") as written_file:
++            written_file.write(contents)
++
++
+ class GtkDialog:
+     """
+     Provides a simple interface for the display of some basic dialogs to collect information from the user.
+Index: autokey/tags
+===================================================================
 --- /dev/null
-+++ autokey-0.94.1/tags
-@@ -0,0 +1,2845 @@
++++ autokey/tags
+@@ -0,0 +1,3029 @@
 +!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
 +!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
 +!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
@@ -424,6 +531,7 @@ Last-Update: 2018-05-13
 +A	doc/scripting/identifier-index.html	/^<tr valign="top"><td valign="top" width="1%"><h2 class="epydoc"><a name="A">A<\/a><\/h2><\/td>$/;"	a
 +ABBREVIATION	lib/autokey/model.py	/^    ABBREVIATION = 1$/;"	v	class:TriggerMode
 +ACTION_DESCRIPTION_FILE	lib/autokey/qtui/configwindow.py	/^ACTION_DESCRIPTION_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data\/gui.xml")$/;"	v
++AK_TO_XK_MAP	.pc/trailing_newlines_fix_1/lib/autokey/interface.py	/^AK_TO_XK_MAP = dict((v,k) for k, v in XK_TO_AK_MAP.items())$/;"	v
 +AK_TO_XK_MAP	lib/autokey/interface.py	/^AK_TO_XK_MAP = dict((v,k) for k, v in XK_TO_AK_MAP.items())$/;"	v
 +ALT	lib/autokey/iomediator/key.py	/^    ALT = "<alt>"$/;"	v	class:Key
 +ALT_GR	lib/autokey/iomediator/key.py	/^    ALT_GR = "<alt_gr>"$/;"	v	class:Key
@@ -451,6 +559,7 @@ Last-Update: 2018-05-13
 +AppService	lib/autokey/common.py	/^class AppService(dbus.service.Object):$/;"	c
 +Application	lib/autokey/gtkapp.py	/^class Application:$/;"	c
 +Application	lib/autokey/qtapp.py	/^class Application:$/;"	c
++AtSpiInterface	.pc/trailing_newlines_fix_1/lib/autokey/interface.py	/^class AtSpiInterface(XInterfaceBase):$/;"	c
 +AtSpiInterface	lib/autokey/interface.py	/^class AtSpiInterface(XInterfaceBase):$/;"	c
 +BACKSPACE	lib/autokey/iomediator/key.py	/^    BACKSPACE = "<backspace>"$/;"	v	class:Key
 +BUG_EMAIL	lib/autokey/common.py	/^BUG_EMAIL = "guociz@gmail.com"$/;"	v
@@ -458,6 +567,7 @@ Last-Update: 2018-05-13
 +BlankPage	lib/autokey/gtkui/configwindow.py	/^class BlankPage:$/;"	c
 +C	doc/scripting/identifier-index.html	/^<tr valign="top"><td valign="top" width="1%"><h2 class="epydoc"><a name="C">C<\/a><\/h2><\/td>$/;"	a
 +CAPSLOCK	lib/autokey/iomediator/key.py	/^    CAPSLOCK = "<capslock>"$/;"	v	class:Key
++CAPSLOCK_LEDMASK	.pc/trailing_newlines_fix_1/lib/autokey/interface.py	/^CAPSLOCK_LEDMASK = 1<<0$/;"	v
 +CAPSLOCK_LEDMASK	lib/autokey/interface.py	/^CAPSLOCK_LEDMASK = 1<<0$/;"	v
 +CATALOG	lib/autokey/common.py	/^CATALOG = ""$/;"	v
 +CB_CTRL_SHIFT_V	lib/autokey/model.py	/^    CB_CTRL_SHIFT_V = Key.CONTROL + '+' + Key.SHIFT + "+v"$/;"	v	class:SendMode
@@ -501,6 +611,7 @@ Last-Update: 2018-05-13
 +END	lib/autokey/iomediator/key.py	/^    END = "<end>"$/;"	v	class:Key
 +ENTER	lib/autokey/iomediator/key.py	/^    ENTER = "<enter>"$/;"	v	class:Key
 +ESCAPE	lib/autokey/iomediator/key.py	/^    ESCAPE = "<escape>"$/;"	v	class:Key
++Engine	.pc/trailing_newlines_fix_1/lib/autokey/scripting.py	/^class Engine:$/;"	c
 +Engine	doc/scripting/lib.scripting-pysrc.html	/^<a name="Engine"><\/a><div id="Engine-def"><a name="L1099"><\/a><tt class="py-lineno">1099<\/tt> <a class="py-toggle" href="#" id="Engine-toggle" onclick="return toggle('Engine');">-<\/a><tt class="py-line"><tt class="py-keyword">class<\/tt> <a class="py-def-name" href="lib.scripting.Engine-class.html">Engine<\/a><tt class="py-op">:<\/tt> <\/tt>$/;"	a
 +Engine	lib/autokey/scripting.py	/^class Engine:$/;"	c
 +Engine.__init__	doc/scripting/lib.scripting-pysrc.html	/^<a name="Engine.__init__"><\/a><div id="Engine.__init__-def"><a name="L1107"><\/a><tt class="py-lineno">1107<\/tt> <a class="py-toggle" href="#" id="Engine.__init__-toggle" onclick="return toggle('Engine.__init__');">-<\/a><tt class="py-line">    <tt class="py-keyword">def<\/tt> <a class="py-def-name" href="lib.scripting.Engine-class.html#__init__">__init__<\/a><tt class="py-op">(<\/tt><tt class="py-param">self<\/tt><tt class="py-op">,<\/tt> <tt class="py-param">configManager<\/tt><tt class="py-op">,<\/tt> <tt class="py-param">runner<\/tt><tt class="py-op">)<\/tt><tt class="py-op">:<\/tt> <\/tt>$/;"	a
@@ -565,6 +676,7 @@ Last-Update: 2018-05-13
 +GlobalHotkey	lib/autokey/configmanager.py	/^class GlobalHotkey(model.AbstractHotkey):$/;"	c
 +GlobalHotkeyDialog	lib/autokey/gtkui/dialogs.py	/^class GlobalHotkeyDialog(HotkeySettingsDialog):$/;"	c
 +GlobalHotkeyDialog	lib/autokey/qtui/dialogs.py	/^class GlobalHotkeyDialog(HotkeySettingsDialog):$/;"	c
++GtkClipboard	.pc/trailing_newlines_fix_1/lib/autokey/scripting.py	/^class GtkClipboard:$/;"	c
 +GtkClipboard	doc/scripting/lib.scripting-pysrc.html	/^<a name="GtkClipboard"><\/a><div id="GtkClipboard-def"><a name="L783"><\/a><tt class="py-lineno"> 783<\/tt> <a class="py-toggle" href="#" id="GtkClipboard-toggle" onclick="return toggle('GtkClipboard');">-<\/a><tt class="py-line"><tt class="py-keyword">class<\/tt> <a class="py-def-name" href="lib.scripting.GtkClipboard-class.html">GtkClipboard<\/a><tt class="py-op">:<\/tt> <\/tt>$/;"	a
 +GtkClipboard	lib/autokey/scripting.py	/^class GtkClipboard:$/;"	c
 +GtkClipboard.__execAsync	doc/scripting/lib.scripting-pysrc.html	/^<a name="GtkClipboard.__execAsync"><\/a><div id="GtkClipboard.__execAsync-def"><a name="L862"><\/a><tt class="py-lineno"> 862<\/tt> <a class="py-toggle" href="#" id="GtkClipboard.__execAsync-toggle" onclick="return toggle('GtkClipboard.__execAsync');">-<\/a><tt class="py-line">    <tt class="py-keyword">def<\/tt> <a class="py-def-name" href="lib.scripting.GtkClipboard-class.html#__execAsync">__execAsync<\/a><tt class="py-op">(<\/tt><tt class="py-param">self<\/tt><tt class="py-op">,<\/tt> <tt class="py-param">callback<\/tt><tt class="py-op">,<\/tt> <tt class="py-op">*<\/tt><tt class="py-param">args<\/tt><tt class="py-op">)<\/tt><tt class="py-op">:<\/tt> <\/tt>$/;"	a
@@ -576,6 +688,7 @@ Last-Update: 2018-05-13
 +GtkClipboard.fill_selection	doc/scripting/lib.scripting-pysrc.html	/^<a name="GtkClipboard.fill_selection"><\/a><div id="GtkClipboard.fill_selection-def"><a name="L793"><\/a><tt class="py-lineno"> 793<\/tt> <a class="py-toggle" href="#" id="GtkClipboard.fill_selection-toggle" onclick="return toggle('GtkClipboard.fill_selection');">-<\/a><tt class="py-line">    <tt class="py-keyword">def<\/tt> <a class="py-def-name" href="lib.scripting.GtkClipboard-class.html#fill_selection">fill_selection<\/a><tt class="py-op">(<\/tt><tt class="py-param">self<\/tt><tt class="py-op">,<\/tt> <tt class="py-param">contents<\/tt><tt class="py-op">)<\/tt><tt class="py-op">:<\/tt> <\/tt>$/;"	a
 +GtkClipboard.get_clipboard	doc/scripting/lib.scripting-pysrc.html	/^<a name="GtkClipboard.get_clipboard"><\/a><div id="GtkClipboard.get_clipboard-def"><a name="L846"><\/a><tt class="py-lineno"> 846<\/tt> <a class="py-toggle" href="#" id="GtkClipboard.get_clipboard-toggle" onclick="return toggle('GtkClipboard.get_clipboard');">-<\/a><tt class="py-line">    <tt class="py-keyword">def<\/tt> <a class="py-def-name" href="lib.scripting.GtkClipboard-class.html#get_clipboard">get_clipboard<\/a><tt class="py-op">(<\/tt><tt class="py-param">self<\/tt><tt class="py-op">)<\/tt><tt class="py-op">:<\/tt> <\/tt>$/;"	a
 +GtkClipboard.get_selection	doc/scripting/lib.scripting-pysrc.html	/^<a name="GtkClipboard.get_selection"><\/a><div id="GtkClipboard.get_selection-def"><a name="L810"><\/a><tt class="py-lineno"> 810<\/tt> <a class="py-toggle" href="#" id="GtkClipboard.get_selection-toggle" onclick="return toggle('GtkClipboard.get_selection');">-<\/a><tt class="py-line">    <tt class="py-keyword">def<\/tt> <a class="py-def-name" href="lib.scripting.GtkClipboard-class.html#get_selection">get_selection<\/a><tt class="py-op">(<\/tt><tt class="py-param">self<\/tt><tt class="py-op">)<\/tt><tt class="py-op">:<\/tt> <\/tt>$/;"	a
++GtkDialog	.pc/trailing_newlines_fix_1/lib/autokey/scripting.py	/^class GtkDialog:$/;"	c
 +GtkDialog	doc/scripting/lib.scripting-pysrc.html	/^<a name="GtkDialog"><\/a><div id="GtkDialog-def"><a name="L492"><\/a><tt class="py-lineno"> 492<\/tt> <a class="py-toggle" href="#" id="GtkDialog-toggle" onclick="return toggle('GtkDialog');">-<\/a><tt class="py-line"><tt class="py-keyword">class<\/tt> <a class="py-def-name" href="lib.scripting.GtkDialog-class.html">GtkDialog<\/a><tt class="py-op">:<\/tt> <\/tt>$/;"	a
 +GtkDialog	lib/autokey/scripting.py	/^class GtkDialog:$/;"	c
 +GtkDialog.__runZenity	doc/scripting/lib.scripting-pysrc.html	/^<a name="GtkDialog.__runZenity"><\/a><div id="GtkDialog.__runZenity-def"><a name="L503"><\/a><tt class="py-lineno"> 503<\/tt> <a class="py-toggle" href="#" id="GtkDialog.__runZenity-toggle" onclick="return toggle('GtkDialog.__runZenity');">-<\/a><tt class="py-line">    <tt class="py-keyword">def<\/tt> <a class="py-def-name" href="lib.scripting.GtkDialog-class.html#__runZenity">__runZenity<\/a><tt class="py-op">(<\/tt><tt class="py-param">self<\/tt><tt class="py-op">,<\/tt> <tt class="py-param">title<\/tt><tt class="py-op">,<\/tt> <tt class="py-param">args<\/tt><tt class="py-op">,<\/tt> <tt class="py-param">kwargs<\/tt><tt class="py-op">)<\/tt><tt class="py-op">:<\/tt> <\/tt>$/;"	a
@@ -588,8 +701,12 @@ Last-Update: 2018-05-13
 +GtkDialog.open_file	doc/scripting/lib.scripting-pysrc.html	/^<a name="GtkDialog.open_file"><\/a><div id="GtkDialog.open_file-def"><a name="L631"><\/a><tt class="py-lineno"> 631<\/tt> <a class="py-toggle" href="#" id="GtkDialog.open_file-toggle" onclick="return toggle('GtkDialog.open_file');">-<\/a><tt class="py-line">    <tt class="py-keyword">def<\/tt> <a class="py-def-name" href="lib.scripting.GtkDialog-class.html#open_file">open_file<\/a><tt class="py-op">(<\/tt><tt class="py-param">self<\/tt><tt class="py-op">,<\/tt> <tt class="py-param">title<\/tt><tt class="py-op">=<\/tt><tt class="py-string">"Open File"<\/tt><tt class="py-op">,<\/tt> <tt class="py-op">**<\/tt><tt class="py-param">kwargs<\/tt><tt class="py-op">)<\/tt><tt class="py-op">:<\/tt> <\/tt>$/;"	a
 +GtkDialog.password_dialog	doc/scripting/lib.scripting-pysrc.html	/^<a name="GtkDialog.password_dialog"><\/a><div id="GtkDialog.password_dialog-def"><a name="L541"><\/a><tt class="py-lineno"> 541<\/tt> <a class="py-toggle" href="#" id="GtkDialog.password_dialog-toggle" onclick="return toggle('GtkDialog.password_dialog');">-<\/a><tt class="py-line">    <tt class="py-keyword">def<\/tt> <a class="py-def-name" href="lib.scripting.GtkDialog-class.html#password_dialog">password_dialog<\/a><tt class="py-op">(<\/tt><tt class="py-param">self<\/tt><tt class="py-op">,<\/tt> <tt class="py-param">title<\/tt><tt class="py-op">=<\/tt><tt class="py-string">"Enter password"<\/tt><tt class="py-op">,<\/tt> <tt class="py-param">message<\/tt><tt class="py-op">=<\/tt><tt class="py-string">"Enter password"<\/tt><tt class="py-op">,<\/tt> <tt class="py-op">**<\/tt><tt class="py-param">kwargs<\/tt><tt class="py-op">)<\/tt><tt class="py-op">:<\/tt> <\/tt>$/;"	a
 +GtkDialog.save_file	doc/scripting/lib.scripting-pysrc.html	/^<a name="GtkDialog.save_file"><\/a><div id="GtkDialog.save_file-def"><a name="L646"><\/a><tt class="py-lineno"> 646<\/tt> <a class="py-toggle" href="#" id="GtkDialog.save_file-toggle" onclick="return toggle('GtkDialog.save_file');">-<\/a><tt class="py-line">    <tt class="py-keyword">def<\/tt> <a class="py-def-name" href="lib.scripting.GtkDialog-class.html#save_file">save_file<\/a><tt class="py-op">(<\/tt><tt class="py-param">self<\/tt><tt class="py-op">,<\/tt> <tt class="py-param">title<\/tt><tt class="py-op">=<\/tt><tt class="py-string">"Save As"<\/tt><tt class="py-op">,<\/tt> <tt class="py-op">**<\/tt><tt class="py-param">kwargs<\/tt><tt class="py-op">)<\/tt><tt class="py-op">:<\/tt> <\/tt>$/;"	a
++HAS_ATSPI	.pc/trailing_newlines_fix_1/lib/autokey/interface.py	/^        HAS_ATSPI = False$/;"	v
++HAS_ATSPI	.pc/trailing_newlines_fix_1/lib/autokey/interface.py	/^        HAS_ATSPI = True$/;"	v
 +HAS_ATSPI	lib/autokey/interface.py	/^        HAS_ATSPI = False$/;"	v
 +HAS_ATSPI	lib/autokey/interface.py	/^        HAS_ATSPI = True$/;"	v
++HAS_RECORD	.pc/trailing_newlines_fix_1/lib/autokey/interface.py	/^    HAS_RECORD = False$/;"	v
++HAS_RECORD	.pc/trailing_newlines_fix_1/lib/autokey/interface.py	/^    HAS_RECORD = True$/;"	v
 +HAS_RECORD	lib/autokey/interface.py	/^    HAS_RECORD = False$/;"	v
 +HAS_RECORD	lib/autokey/interface.py	/^    HAS_RECORD = True$/;"	v
 +HELD_MODIFIERS	lib/autokey/iomediator/constants.py	/^HELD_MODIFIERS = [Key.CONTROL, Key.ALT, Key.SUPER, Key.SHIFT, Key.HYPER, Key.META]$/;"	v
@@ -634,6 +751,7 @@ Last-Update: 2018-05-13
 +KEY_SPLIT_RE	lib/autokey/iomediator/constants.py	/^KEY_SPLIT_RE = re.compile("(<[^<>]+>\\+?)")$/;"	v
 +Key	lib/autokey/iomediator/key.py	/^class Key(str, enum.Enum):$/;"	c
 +KeyGrabber	lib/autokey/iomediator/_keygrabber.py	/^class KeyGrabber:$/;"	c
++Keyboard	.pc/trailing_newlines_fix_1/lib/autokey/scripting.py	/^class Keyboard:$/;"	c
 +Keyboard	doc/scripting/lib.scripting-pysrc.html	/^<a name="Keyboard"><\/a><div id="Keyboard-def"><a name="L25"><\/a><tt class="py-lineno">  25<\/tt> <a class="py-toggle" href="#" id="Keyboard-toggle" onclick="return toggle('Keyboard');">-<\/a><tt class="py-line"><tt class="py-keyword">class<\/tt> <a class="py-def-name" href="lib.scripting.Keyboard-class.html">Keyboard<\/a><tt class="py-op">:<\/tt> <\/tt>$/;"	a
 +Keyboard	lib/autokey/scripting.py	/^class Keyboard:$/;"	c
 +Keyboard.__init__	doc/scripting/lib.scripting-pysrc.html	/^<a name="Keyboard.__init__"><\/a><div id="Keyboard.__init__-def"><a name="L30"><\/a><tt class="py-lineno">  30<\/tt> <a class="py-toggle" href="#" id="Keyboard.__init__-toggle" onclick="return toggle('Keyboard.__init__');">-<\/a><tt class="py-line">    <tt class="py-keyword">def<\/tt> <a class="py-def-name" href="lib.scripting.Keyboard-class.html#__init__">__init__<\/a><tt class="py-op">(<\/tt><tt class="py-param">self<\/tt><tt class="py-op">,<\/tt> <tt class="py-param">mediator<\/tt><tt class="py-op">)<\/tt><tt class="py-op">:<\/tt> <\/tt>$/;"	a
@@ -1832,6 +1950,7 @@ Last-Update: 2018-05-13
 +MAINTAINER	lib/autokey/common.py	/^MAINTAINER = 'GuoCi'$/;"	v
 +MAINTAINER_EMAIL	lib/autokey/common.py	/^MAINTAINER_EMAIL = 'guociz@gmail.com'$/;"	v
 +MASK	lib/autokey/monitor.py	/^MASK = m["IN_CREATE"]|m["IN_MODIFY"]|m["IN_DELETE"]|m["IN_MOVED_TO"]|m["IN_MOVED_FROM"]$/;"	v
++MASK_INDEXES	.pc/trailing_newlines_fix_1/lib/autokey/interface.py	/^MASK_INDEXES = [$/;"	v
 +MASK_INDEXES	lib/autokey/interface.py	/^MASK_INDEXES = [$/;"	v
 +MAX_LOG_COUNT	lib/autokey/common.py	/^MAX_LOG_COUNT = 3$/;"	v
 +MAX_LOG_SIZE	lib/autokey/common.py	/^MAX_LOG_SIZE = 5 * 1024 * 1024  # 5 megabytes$/;"	v
@@ -1845,6 +1964,7 @@ Last-Update: 2018-05-13
 +MacroManager	lib/autokey/macro.py	/^class MacroManager:$/;"	c
 +MenuBase	lib/autokey/qtui/popupmenu.py	/^class MenuBase:$/;"	c
 +MockService	test/interfacetest.py	/^class MockService:$/;"	c
++Mouse	.pc/trailing_newlines_fix_1/lib/autokey/scripting.py	/^class Mouse:$/;"	c
 +Mouse	doc/scripting/lib.scripting-pysrc.html	/^<a name="Mouse"><\/a><div id="Mouse-def"><a name="L112"><\/a><tt class="py-lineno"> 112<\/tt> <a class="py-toggle" href="#" id="Mouse-toggle" onclick="return toggle('Mouse');">-<\/a><tt class="py-line"><tt class="py-keyword">class<\/tt> <a class="py-def-name" href="lib.scripting.Mouse-class.html">Mouse<\/a><tt class="py-op">:<\/tt> <\/tt>$/;"	a
 +Mouse	lib/autokey/scripting.py	/^class Mouse:$/;"	c
 +Mouse.__init__	doc/scripting/lib.scripting-pysrc.html	/^<a name="Mouse.__init__"><\/a><div id="Mouse.__init__-def"><a name="L116"><\/a><tt class="py-lineno"> 116<\/tt> <a class="py-toggle" href="#" id="Mouse.__init__-toggle" onclick="return toggle('Mouse.__init__');">-<\/a><tt class="py-line">    <tt class="py-keyword">def<\/tt> <a class="py-def-name" href="lib.scripting.Mouse-class.html#__init__">__init__<\/a><tt class="py-op">(<\/tt><tt class="py-param">self<\/tt><tt class="py-op">,<\/tt> <tt class="py-param">mediator<\/tt><tt class="py-op">)<\/tt><tt class="py-op">:<\/tt> <\/tt>$/;"	a
@@ -1871,6 +1991,7 @@ Last-Update: 2018-05-13
 +NP_SUBTRACT	lib/autokey/iomediator/key.py	/^    NP_SUBTRACT = "<np_subtract>"$/;"	v	class:Key
 +NP_UP	lib/autokey/iomediator/key.py	/^    NP_UP = "<np_up>"$/;"	v	class:Key
 +NUMLOCK	lib/autokey/iomediator/key.py	/^    NUMLOCK = "<numlock>"$/;"	v	class:Key
++NUMLOCK_LEDMASK	.pc/trailing_newlines_fix_1/lib/autokey/interface.py	/^NUMLOCK_LEDMASK = 1<<1$/;"	v
 +NUMLOCK_LEDMASK	lib/autokey/interface.py	/^NUMLOCK_LEDMASK = 1<<1$/;"	v
 +Notifier	lib/autokey/qtui/notifier.py	/^class Notifier:$/;"	c
 +O	doc/scripting/identifier-index.html	/^<tr valign="top"><td valign="top" width="1%"><h2 class="epydoc"><a name="O">O<\/a><\/h2><\/td>$/;"	a
@@ -1901,6 +2022,7 @@ Last-Update: 2018-05-13
 +PredictivePhraseTest	test/phrasetest.py	/^class PredictivePhraseTest(unittest.TestCase):$/;"	c
 +Processor	lib/autokey/monitor.py	/^class Processor(ProcessEvent):$/;"	c
 +Q	doc/scripting/identifier-index.html	/^<tr valign="top"><td valign="top" width="1%"><h2 class="epydoc"><a name="Q">Q<\/a><\/h2><\/td>$/;"	a
++QtClipboard	.pc/trailing_newlines_fix_1/lib/autokey/scripting.py	/^class QtClipboard:$/;"	c
 +QtClipboard	doc/scripting/lib.scripting-pysrc.html	/^<a name="QtClipboard"><\/a><div id="QtClipboard-def"><a name="L708"><\/a><tt class="py-lineno"> 708<\/tt> <a class="py-toggle" href="#" id="QtClipboard-toggle" onclick="return toggle('QtClipboard');">-<\/a><tt class="py-line"><tt class="py-keyword">class<\/tt> <a class="py-def-name" href="lib.scripting.QtClipboard-class.html">QtClipboard<\/a><tt class="py-op">:<\/tt> <\/tt>$/;"	a
 +QtClipboard	lib/autokey/scripting.py	/^class QtClipboard:$/;"	c
 +QtClipboard.__execAsync	doc/scripting/lib.scripting-pysrc.html	/^<a name="QtClipboard.__execAsync"><\/a><div id="QtClipboard.__execAsync-def"><a name="L777"><\/a><tt class="py-lineno"> 777<\/tt> <a class="py-toggle" href="#" id="QtClipboard.__execAsync-toggle" onclick="return toggle('QtClipboard.__execAsync');">-<\/a><tt class="py-line">    <tt class="py-keyword">def<\/tt> <a class="py-def-name" href="lib.scripting.QtClipboard-class.html#__execAsync">__execAsync<\/a><tt class="py-op">(<\/tt><tt class="py-param">self<\/tt><tt class="py-op">,<\/tt> <tt class="py-param">callback<\/tt><tt class="py-op">,<\/tt> <tt class="py-op">*<\/tt><tt class="py-param">args<\/tt><tt class="py-op">)<\/tt><tt class="py-op">:<\/tt> <\/tt>$/;"	a
@@ -1913,6 +2035,7 @@ Last-Update: 2018-05-13
 +QtClipboard.fill_selection	doc/scripting/lib.scripting-pysrc.html	/^<a name="QtClipboard.fill_selection"><\/a><div id="QtClipboard.fill_selection-def"><a name="L717"><\/a><tt class="py-lineno"> 717<\/tt> <a class="py-toggle" href="#" id="QtClipboard.fill_selection-toggle" onclick="return toggle('QtClipboard.fill_selection');">-<\/a><tt class="py-line">    <tt class="py-keyword">def<\/tt> <a class="py-def-name" href="lib.scripting.QtClipboard-class.html#fill_selection">fill_selection<\/a><tt class="py-op">(<\/tt><tt class="py-param">self<\/tt><tt class="py-op">,<\/tt> <tt class="py-param">contents<\/tt><tt class="py-op">)<\/tt><tt class="py-op">:<\/tt> <\/tt>$/;"	a
 +QtClipboard.get_clipboard	doc/scripting/lib.scripting-pysrc.html	/^<a name="QtClipboard.get_clipboard"><\/a><div id="QtClipboard.get_clipboard-def"><a name="L761"><\/a><tt class="py-lineno"> 761<\/tt> <a class="py-toggle" href="#" id="QtClipboard.get_clipboard-toggle" onclick="return toggle('QtClipboard.get_clipboard');">-<\/a><tt class="py-line">    <tt class="py-keyword">def<\/tt> <a class="py-def-name" href="lib.scripting.QtClipboard-class.html#get_clipboard">get_clipboard<\/a><tt class="py-op">(<\/tt><tt class="py-param">self<\/tt><tt class="py-op">)<\/tt><tt class="py-op">:<\/tt> <\/tt>$/;"	a
 +QtClipboard.get_selection	doc/scripting/lib.scripting-pysrc.html	/^<a name="QtClipboard.get_selection"><\/a><div id="QtClipboard.get_selection-def"><a name="L731"><\/a><tt class="py-lineno"> 731<\/tt> <a class="py-toggle" href="#" id="QtClipboard.get_selection-toggle" onclick="return toggle('QtClipboard.get_selection');">-<\/a><tt class="py-line">    <tt class="py-keyword">def<\/tt> <a class="py-def-name" href="lib.scripting.QtClipboard-class.html#get_selection">get_selection<\/a><tt class="py-op">(<\/tt><tt class="py-param">self<\/tt><tt class="py-op">)<\/tt><tt class="py-op">:<\/tt> <\/tt>$/;"	a
++QtDialog	.pc/trailing_newlines_fix_1/lib/autokey/scripting.py	/^class QtDialog:$/;"	c
 +QtDialog	doc/scripting/lib.scripting-pysrc.html	/^<a name="QtDialog"><\/a><div id="QtDialog-def"><a name="L225"><\/a><tt class="py-lineno"> 225<\/tt> <a class="py-toggle" href="#" id="QtDialog-toggle" onclick="return toggle('QtDialog');">-<\/a><tt class="py-line"><tt class="py-keyword">class<\/tt> <a class="py-def-name" href="lib.scripting.QtDialog-class.html">QtDialog<\/a><tt class="py-op">:<\/tt> <\/tt>$/;"	a
 +QtDialog	lib/autokey/scripting.py	/^class QtDialog:$/;"	c
 +QtDialog.__runKdialog	doc/scripting/lib.scripting-pysrc.html	/^<a name="QtDialog.__runKdialog"><\/a><div id="QtDialog.__runKdialog-def"><a name="L237"><\/a><tt class="py-lineno"> 237<\/tt> <a class="py-toggle" href="#" id="QtDialog.__runKdialog-toggle" onclick="return toggle('QtDialog.__runKdialog');">-<\/a><tt class="py-line">    <tt class="py-keyword">def<\/tt> <a class="py-def-name" href="lib.scripting.QtDialog-class.html#__runKdialog">__runKdialog<\/a><tt class="py-op">(<\/tt><tt class="py-param">self<\/tt><tt class="py-op">,<\/tt> <tt class="py-param">title<\/tt><tt class="py-op">,<\/tt> <tt class="py-param">args<\/tt><tt class="py-op">,<\/tt> <tt class="py-param">kwargs<\/tt><tt class="py-op">)<\/tt><tt class="py-op">:<\/tt> <\/tt>$/;"	a
@@ -1980,6 +2103,7 @@ Last-Update: 2018-05-13
 +Store.set_global_value	doc/scripting/lib.scripting-pysrc.html	/^<a name="Store.set_global_value"><\/a><div id="Store.set_global_value-def"><a name="L198"><\/a><tt class="py-lineno"> 198<\/tt> <a class="py-toggle" href="#" id="Store.set_global_value-toggle" onclick="return toggle('Store.set_global_value');">-<\/a><tt class="py-line">    <tt class="py-keyword">def<\/tt> <a class="py-def-name" href="lib.scripting.Store-class.html#set_global_value">set_global_value<\/a><tt class="py-op">(<\/tt><tt class="py-param">self<\/tt><tt class="py-op">,<\/tt> <tt class="py-param">key<\/tt><tt class="py-op">,<\/tt> <tt class="py-param">value<\/tt><tt class="py-op">)<\/tt><tt class="py-op">:<\/tt> <\/tt>$/;"	a
 +Store.set_value	doc/scripting/lib.scripting-pysrc.html	/^<a name="Store.set_value"><\/a><div id="Store.set_value-def"><a name="L174"><\/a><tt class="py-lineno"> 174<\/tt> <a class="py-toggle" href="#" id="Store.set_value-toggle" onclick="return toggle('Store.set_value');">-<\/a><tt class="py-line">    <tt class="py-keyword">def<\/tt> <a class="py-def-name" href="lib.scripting.Store-class.html#set_value">set_value<\/a><tt class="py-op">(<\/tt><tt class="py-param">self<\/tt><tt class="py-op">,<\/tt> <tt class="py-param">key<\/tt><tt class="py-op">,<\/tt> <tt class="py-param">value<\/tt><tt class="py-op">)<\/tt><tt class="py-op">:<\/tt> <\/tt>$/;"	a
 +SubMenu	lib/autokey/qtui/popupmenu.py	/^class SubMenu(KActionMenu, MenuBase):$/;"	c
++System	.pc/trailing_newlines_fix_1/lib/autokey/scripting.py	/^class System:$/;"	c
 +System	doc/scripting/lib.scripting-pysrc.html	/^<a name="System"><\/a><div id="System-def"><a name="L448"><\/a><tt class="py-lineno"> 448<\/tt> <a class="py-toggle" href="#" id="System-toggle" onclick="return toggle('System');">-<\/a><tt class="py-line"><tt class="py-keyword">class<\/tt> <a class="py-def-name" href="lib.scripting.System-class.html">System<\/a><tt class="py-op">:<\/tt> <\/tt>$/;"	a
 +System	lib/autokey/scripting.py	/^class System:$/;"	c
 +System.create_file	doc/scripting/lib.scripting-pysrc.html	/^<a name="System.create_file"><\/a><div id="System.create_file-def"><a name="L478"><\/a><tt class="py-lineno"> 478<\/tt> <a class="py-toggle" href="#" id="System.create_file-toggle" onclick="return toggle('System.create_file');">-<\/a><tt class="py-line">    <tt class="py-keyword">def<\/tt> <a class="py-def-name" href="lib.scripting.System-class.html#create_file">create_file<\/a><tt class="py-op">(<\/tt><tt class="py-param">self<\/tt><tt class="py-op">,<\/tt> <tt class="py-param">fileName<\/tt><tt class="py-op">,<\/tt> <tt class="py-param">contents<\/tt><tt class="py-op">=<\/tt><tt class="py-string">""<\/tt><tt class="py-op">)<\/tt><tt class="py-op">:<\/tt> <\/tt>$/;"	a
@@ -2024,6 +2148,7 @@ Last-Update: 2018-05-13
 +WORKAROUND_APP_REGEX	lib/autokey/configmanager.py	/^WORKAROUND_APP_REGEX = "workAroundApps"$/;"	v
 +Waiter	lib/autokey/iomediator/_waiter.py	/^class Waiter:$/;"	c
 +WidgetItemFactory	lib/autokey/qtui/configwindow.py	/^class WidgetItemFactory:$/;"	c
++Window	.pc/trailing_newlines_fix_1/lib/autokey/scripting.py	/^class Window:$/;"	c
 +Window	doc/scripting/lib.scripting-pysrc.html	/^<a name="Window"><\/a><div id="Window-def"><a name="L870"><\/a><tt class="py-lineno"> 870<\/tt> <a class="py-toggle" href="#" id="Window-toggle" onclick="return toggle('Window');">-<\/a><tt class="py-line"><tt class="py-keyword">class<\/tt> <a class="py-def-name" href="lib.scripting.Window-class.html">Window<\/a><tt class="py-op">:<\/tt> <\/tt>$/;"	a
 +Window	lib/autokey/scripting.py	/^class Window:$/;"	c
 +Window.__init__	doc/scripting/lib.scripting-pysrc.html	/^<a name="Window.__init__"><\/a><div id="Window.__init__-def"><a name="L881"><\/a><tt class="py-lineno"> 881<\/tt> <a class="py-toggle" href="#" id="Window.__init__-toggle" onclick="return toggle('Window.__init__');">-<\/a><tt class="py-line">    <tt class="py-keyword">def<\/tt> <a class="py-def-name" href="lib.scripting.Window-class.html#__init__">__init__<\/a><tt class="py-op">(<\/tt><tt class="py-param">self<\/tt><tt class="py-op">,<\/tt> <tt class="py-param">mediator<\/tt><tt class="py-op">)<\/tt><tt class="py-op">:<\/tt> <\/tt>$/;"	a
@@ -2044,10 +2169,14 @@ Last-Update: 2018-05-13
 +WindowFilterSettingsDialog	lib/autokey/qtui/dialogs.py	/^class WindowFilterSettingsDialog(KDialog):$/;"	c
 +WindowGrabber	lib/autokey/iomediator/_windowgrabber.py	/^class WindowGrabber:$/;"	c
 +XDG_CACHE_HOME	lib/autokey/common.py	/^XDG_CACHE_HOME = os.environ.get('XDG_CACHE_HOME', os.path.expanduser('~\/.cache'))$/;"	v
++XInterfaceBase	.pc/trailing_newlines_fix_1/lib/autokey/interface.py	/^class XInterfaceBase(threading.Thread):$/;"	c
 +XInterfaceBase	lib/autokey/interface.py	/^class XInterfaceBase(threading.Thread):$/;"	c
++XK_TO_AK_MAP	.pc/trailing_newlines_fix_1/lib/autokey/interface.py	/^XK_TO_AK_MAP = {$/;"	v
 +XK_TO_AK_MAP	lib/autokey/interface.py	/^XK_TO_AK_MAP = {$/;"	v
++XK_TO_AK_NUMLOCKED	.pc/trailing_newlines_fix_1/lib/autokey/interface.py	/^XK_TO_AK_NUMLOCKED = {$/;"	v
 +XK_TO_AK_NUMLOCKED	lib/autokey/interface.py	/^XK_TO_AK_NUMLOCKED = {$/;"	v
 +XLibInterfaceTest	test/interfacetest.py	/^class XLibInterfaceTest(unittest.TestCase):$/;"	c
++XRecordInterface	.pc/trailing_newlines_fix_1/lib/autokey/interface.py	/^class XRecordInterface(XInterfaceBase):$/;"	c
 +XRecordInterface	lib/autokey/interface.py	/^class XRecordInterface(XInterfaceBase):$/;"	c
 +X_RECORD_INTERFACE	lib/autokey/iomediator/constants.py	/^X_RECORD_INTERFACE = "XRecord"$/;"	v
 +_	doc/scripting/identifier-index.html	/^<tr valign="top"><td valign="top" width="1%"><h2 class="epydoc"><a name="_">_<\/a><\/h2><\/td>$/;"	a
@@ -2055,6 +2184,7 @@ Last-Update: 2018-05-13
 +__addItem	lib/autokey/qtui/configwindow.py	/^    def __addItem(self, item):$/;"	m	class:ListWidgetHandler	file:
 +__addItemsToSelf	lib/autokey/gtkui/popupmenu.py	/^    def __addItemsToSelf(self, items, service, onDesktop):$/;"	m	class:PopupMenu	file:
 +__addToolbar	lib/autokey/gtkui/configwindow.py	/^    def __addToolbar(self):$/;"	m	class:ConfigWindow	file:
++__all__	.pc/trailing_newlines_fix_1/lib/autokey/interface.py	/^__all__ = ["XRecordInterface", "AtSpiInterface"]$/;"	v
 +__all__	lib/autokey/gtkui/dialogs.py	/^__all__ = ["validate", "EMPTY_FIELD_REGEX", "AbbrSettingsDialog", "HotkeySettingsDialog", "WindowFilterSettingsDialog", "RecordDialog"]$/;"	v
 +__all__	lib/autokey/interface.py	/^__all__ = ["XRecordInterface", "AtSpiInterface"]$/;"	v
 +__all__	lib/autokey/qtui/dialogs.py	/^__all__ = ["validate", "EMPTY_FIELD_REGEX", "AbbrSettingsDialog", "HotkeySettingsDialog", "WindowFilterSettingsDialog", "RecordDialog"]$/;"	v
@@ -2063,6 +2193,7 @@ Last-Update: 2018-05-13
 +__checkExistingFolder	lib/autokey/configmanager.py	/^    def __checkExistingFolder(self, path):$/;"	m	class:ConfigManager	file:
 +__checkInput	lib/autokey/model.py	/^    def __checkInput(self, buffer, abbr):$/;"	m	class:AbstractAbbreviation	file:
 +__checkTextMatches	lib/autokey/service.py	/^    def __checkTextMatches(self, folders, items, buffer, windowInfo, immediate=False):$/;"	m	class:Service	file:
++__checkWorkaroundNeeded	.pc/trailing_newlines_fix_1/lib/autokey/interface.py	/^    def __checkWorkaroundNeeded(self):$/;"	m	class:XInterfaceBase	file:
 +__checkWorkaroundNeeded	lib/autokey/interface.py	/^    def __checkWorkaroundNeeded(self):$/;"	m	class:XInterfaceBase	file:
 +__clearModifiers	lib/autokey/iomediator/_iomediator.py	/^    def __clearModifiers(self):$/;"	m	class:IoMediator	file:
 +__completeShutdown	lib/autokey/gtkapp.py	/^    def __completeShutdown(self):$/;"	m	class:Application	file:
@@ -2074,39 +2205,57 @@ Last-Update: 2018-05-13
 +__createMenu	lib/autokey/qtapp.py	/^    def __createMenu(self, folders, items, onDesktop, title):$/;"	m	class:Application	file:
 +__createMenuAction	lib/autokey/qtui/configwindow.py	/^    def __createMenuAction(self, actionName, name, target=None, iconName=None):$/;"	m	class:ConfigWindow	file:
 +__createToggleAction	lib/autokey/qtui/configwindow.py	/^    def __createToggleAction(self, actionName, name, target, iconName=None):$/;"	m	class:ConfigWindow	file:
++__decodeModifier	.pc/trailing_newlines_fix_1/lib/autokey/interface.py	/^    def __decodeModifier(self, keyCode):$/;"	m	class:XInterfaceBase	file:
 +__decodeModifier	lib/autokey/interface.py	/^    def __decodeModifier(self, keyCode):$/;"	m	class:XInterfaceBase	file:
 +__delayPassed	lib/autokey/iomediator/_keygrabber.py	/^    def __delayPassed(self):$/;"	m	class:Recorder	file:
++__delayedInitMappings	.pc/trailing_newlines_fix_1/lib/autokey/interface.py	/^    def __delayedInitMappings(self):        $/;"	m	class:XInterfaceBase	file:
 +__delayedInitMappings	lib/autokey/interface.py	/^    def __delayedInitMappings(self):$/;"	m	class:XInterfaceBase	file:
 +__deleteHotkeys	lib/autokey/gtkui/configwindow.py	/^    def __deleteHotkeys(self, theItem):$/;"	m	class:ConfigWindow	file:
 +__deleteHotkeys	lib/autokey/qtui/configwindow.py	/^    def __deleteHotkeys(self, theItem):$/;"	m	class:CentralWidget	file:
++__doQT4Workaround	.pc/trailing_newlines_fix_1/lib/autokey/interface.py	/^    def __doQT4Workaround(self, keyCode):$/;"	m	class:XInterfaceBase	file:
 +__doQT4Workaround	lib/autokey/interface.py	/^    def __doQT4Workaround(self, keyCode):$/;"	m	class:XInterfaceBase	file:
 +__doRecord	lib/autokey/qtui/configwindow.py	/^    def __doRecord(self, ok, recKb, recMouse, delay):$/;"	m	class:ConfigWindow	file:
 +__dropRecurseUpdate	lib/autokey/gtkui/configwindow.py	/^    def __dropRecurseUpdate(self, folder):$/;"	m	class:ConfigWindow	file:
++__enqueue	.pc/trailing_newlines_fix_1/lib/autokey/interface.py	/^    def __enqueue(self, method, *args):$/;"	m	class:XInterfaceBase	file:
 +__enqueue	lib/autokey/interface.py	/^    def __enqueue(self, method, *args):$/;"	m	class:XInterfaceBase	file:
++__eventLoop	.pc/trailing_newlines_fix_1/lib/autokey/interface.py	/^    def __eventLoop(self):$/;"	m	class:XInterfaceBase	file:
 +__eventLoop	lib/autokey/interface.py	/^    def __eventLoop(self):$/;"	m	class:XInterfaceBase	file:
++__execAsync	.pc/trailing_newlines_fix_1/lib/autokey/scripting.py	/^    def __execAsync(self, callback, *args):$/;"	m	class:QtClipboard	file:
 +__execAsync	doc/scripting/lib.scripting.GtkClipboard-class.html	/^          <td><span class="summary-sig"><a name="__execAsync"><\/a><span class="summary-sig-name">__execAsync<\/span>(<span class="summary-sig-arg">self<\/span>,$/;"	a
 +__execAsync	doc/scripting/lib.scripting.QtClipboard-class.html	/^          <td><span class="summary-sig"><a name="__execAsync"><\/a><span class="summary-sig-name">__execAsync<\/span>(<span class="summary-sig-arg">self<\/span>,$/;"	a
 +__execAsync	lib/autokey/scripting.py	/^    def __execAsync(self, callback, *args):$/;"	m	class:QtClipboard	file:
 +__extractData	lib/autokey/qtui/configwindow.py	/^    def __extractData(self, item):$/;"	m	class:CentralWidget	file:
++__fakeKeydown	.pc/trailing_newlines_fix_1/lib/autokey/interface.py	/^    def __fakeKeydown(self, keyName):$/;"	m	class:XInterfaceBase	file:
 +__fakeKeydown	lib/autokey/interface.py	/^    def __fakeKeydown(self, keyName):$/;"	m	class:XInterfaceBase	file:
++__fakeKeypress	.pc/trailing_newlines_fix_1/lib/autokey/interface.py	/^    def __fakeKeypress(self, keyName):        $/;"	m	class:XInterfaceBase	file:
 +__fakeKeypress	lib/autokey/interface.py	/^    def __fakeKeypress(self, keyName):$/;"	m	class:XInterfaceBase	file:
++__fakeKeyup	.pc/trailing_newlines_fix_1/lib/autokey/interface.py	/^    def __fakeKeyup(self, keyName):$/;"	m	class:XInterfaceBase	file:
 +__fakeKeyup	lib/autokey/interface.py	/^    def __fakeKeyup(self, keyName):$/;"	m	class:XInterfaceBase	file:
++__fillClipboard	.pc/trailing_newlines_fix_1/lib/autokey/interface.py	/^    def __fillClipboard(self, string):$/;"	m	class:XInterfaceBase	file:
++__fillClipboard	.pc/trailing_newlines_fix_1/lib/autokey/scripting.py	/^    def __fillClipboard(self, string):$/;"	m	class:QtClipboard	file:
 +__fillClipboard	doc/scripting/lib.scripting.GtkClipboard-class.html	/^          <td><span class="summary-sig"><a name="__fillClipboard"><\/a><span class="summary-sig-name">__fillClipboard<\/span>(<span class="summary-sig-arg">self<\/span>,$/;"	a
 +__fillClipboard	doc/scripting/lib.scripting.QtClipboard-class.html	/^          <td><span class="summary-sig"><a name="__fillClipboard"><\/a><span class="summary-sig-name">__fillClipboard<\/span>(<span class="summary-sig-arg">self<\/span>,$/;"	a
 +__fillClipboard	lib/autokey/interface.py	/^    def __fillClipboard(self, string):$/;"	m	class:XInterfaceBase	file:
 +__fillClipboard	lib/autokey/scripting.py	/^    def __fillClipboard(self, string):$/;"	m	class:QtClipboard	file:
++__fillSelection	.pc/trailing_newlines_fix_1/lib/autokey/interface.py	/^    def __fillSelection(self, string):$/;"	m	class:XInterfaceBase	file:
++__fillSelection	.pc/trailing_newlines_fix_1/lib/autokey/scripting.py	/^    def __fillSelection(self, string):$/;"	m	class:GtkClipboard	file:
++__fillSelection	.pc/trailing_newlines_fix_1/lib/autokey/scripting.py	/^    def __fillSelection(self, string):$/;"	m	class:QtClipboard	file:
 +__fillSelection	doc/scripting/lib.scripting.GtkClipboard-class.html	/^          <td><span class="summary-sig"><a name="__fillSelection"><\/a><span class="summary-sig-name">__fillSelection<\/span>(<span class="summary-sig-arg">self<\/span>,$/;"	a
 +__fillSelection	doc/scripting/lib.scripting.QtClipboard-class.html	/^          <td><span class="summary-sig"><a name="__fillSelection"><\/a><span class="summary-sig-name">__fillSelection<\/span>(<span class="summary-sig-arg">self<\/span>,$/;"	a
 +__fillSelection	lib/autokey/interface.py	/^    def __fillSelection(self, string):$/;"	m	class:XInterfaceBase	file:
 +__fillSelection	lib/autokey/scripting.py	/^    def __fillSelection(self, string):$/;"	m	class:GtkClipboard	file:
 +__fillSelection	lib/autokey/scripting.py	/^    def __fillSelection(self, string):$/;"	m	class:QtClipboard	file:
 +__findItem	lib/autokey/service.py	/^    def __findItem(self, name, objType, typeDescription):$/;"	m	class:Service	file:
++__findUsableKeycode	.pc/trailing_newlines_fix_1/lib/autokey/interface.py	/^    def __findUsableKeycode(self, codeList):$/;"	m	class:XInterfaceBase	file:
 +__findUsableKeycode	lib/autokey/interface.py	/^    def __findUsableKeycode(self, codeList):$/;"	m	class:XInterfaceBase	file:
++__flush	.pc/trailing_newlines_fix_1/lib/autokey/interface.py	/^    def __flush(self):$/;"	m	class:XInterfaceBase	file:
 +__flush	lib/autokey/interface.py	/^    def __flush(self):$/;"	m	class:XInterfaceBase	file:
++__flushEvents	.pc/trailing_newlines_fix_1/lib/autokey/interface.py	/^    def __flushEvents(self):$/;"	m	class:XInterfaceBase	file:
 +__flushEvents	lib/autokey/interface.py	/^    def __flushEvents(self):$/;"	m	class:XInterfaceBase	file:
 +__ge__	lib/autokey/qtui/configwindow.py	/^    def __ge__(self, other):$/;"	m	class:FolderWidgetItem	file:
 +__ge__	lib/autokey/qtui/configwindow.py	/^    def __ge__(self, other):$/;"	m	class:PhraseWidgetItem	file:
 +__ge__	lib/autokey/qtui/configwindow.py	/^    def __ge__(self, other):$/;"	m	class:ScriptWidgetItem	file:
++__getClipboard	.pc/trailing_newlines_fix_1/lib/autokey/scripting.py	/^    def __getClipboard(self):$/;"	m	class:QtClipboard	file:
 +__getClipboard	doc/scripting/lib.scripting.QtClipboard-class.html	/^          <td><span class="summary-sig"><a name="__getClipboard"><\/a><span class="summary-sig-name">__getClipboard<\/span>(<span class="summary-sig-arg">self<\/span>)<\/span><\/td>$/;"	a
 +__getClipboard	lib/autokey/scripting.py	/^    def __getClipboard(self):$/;"	m	class:QtClipboard	file:
 +__getCurrentPage	lib/autokey/gtkui/configwindow.py	/^    def __getCurrentPage(self):$/;"	m	class:ConfigWindow	file:
@@ -2116,29 +2265,48 @@ Last-Update: 2018-05-13
 +__getNewItemName	lib/autokey/gtkui/configwindow.py	/^    def __getNewItemName(self, itemType):$/;"	m	class:ConfigWindow	file:
 +__getQuickItem	lib/autokey/gtkui/notifier.py	/^    def __getQuickItem(self, label):$/;"	m	class:UnityLauncher	file:
 +__getRealParent	lib/autokey/gtkui/configwindow.py	/^    def __getRealParent(self, parentIter):$/;"	m	class:ConfigWindow	file:
++__getSelection	.pc/trailing_newlines_fix_1/lib/autokey/scripting.py	/^    def __getSelection(self):$/;"	m	class:QtClipboard	file:
 +__getSelection	doc/scripting/lib.scripting.QtClipboard-class.html	/^          <td><span class="summary-sig"><a name="__getSelection"><\/a><span class="summary-sig-name">__getSelection<\/span>(<span class="summary-sig-arg">self<\/span>)<\/span><\/td>$/;"	a
 +__getSelection	lib/autokey/qtui/configwindow.py	/^    def __getSelection(self):$/;"	m	class:CentralWidget	file:
 +__getSelection	lib/autokey/scripting.py	/^    def __getSelection(self):$/;"	m	class:QtClipboard	file:
 +__getTreeSelection	lib/autokey/gtkui/configwindow.py	/^    def __getTreeSelection(self):$/;"	m	class:ConfigWindow	file:
++__getWinClass	.pc/trailing_newlines_fix_1/lib/autokey/interface.py	/^    def __getWinClass(self, windowvar, traverse):$/;"	m	class:XInterfaceBase	file:
 +__getWinClass	lib/autokey/interface.py	/^    def __getWinClass(self, windowvar, traverse):$/;"	m	class:XInterfaceBase	file:
++__getWinTitle	.pc/trailing_newlines_fix_1/lib/autokey/interface.py	/^    def __getWinTitle(self, windowvar, traverse):$/;"	m	class:XInterfaceBase	file:
 +__getWinTitle	lib/autokey/interface.py	/^    def __getWinTitle(self, windowvar, traverse):$/;"	m	class:XInterfaceBase	file:
 +__getattr__	lib/autokey/gtkui/configwindow.py	/^    def __getattr__(self, attr):$/;"	m	class:ConfigWindow	file:
 +__getattr__	lib/autokey/gtkui/configwindow.py	/^    def __getattr__(self, attr):$/;"	m	class:RenameDialog	file:
 +__getattr__	lib/autokey/gtkui/configwindow.py	/^    def __getattr__(self, attr):$/;"	m	class:SettingsWidget	file:
 +__getattr__	lib/autokey/gtkui/dialogs.py	/^    def __getattr__(self, attr):$/;"	m	class:DialogBase	file:
 +__getattr__	lib/autokey/gtkui/settingsdialog.py	/^    def __getattr__(self, attr):$/;"	m	class:SettingsDialog	file:
++__grabHotkey	.pc/trailing_newlines_fix_1/lib/autokey/interface.py	/^    def __grabHotkey(self, key, modifiers, window):$/;"	m	class:XInterfaceBase	file:
 +__grabHotkey	lib/autokey/interface.py	/^    def __grabHotkey(self, key, modifiers, window):$/;"	m	class:XInterfaceBase	file:
++__grabHotkeys	.pc/trailing_newlines_fix_1/lib/autokey/interface.py	/^    def __grabHotkeys(self):$/;"	m	class:XInterfaceBase	file:
 +__grabHotkeys	lib/autokey/interface.py	/^    def __grabHotkeys(self):$/;"	m	class:XInterfaceBase	file:
++__grabHotkeysForWindow	.pc/trailing_newlines_fix_1/lib/autokey/interface.py	/^    def __grabHotkeysForWindow(self, window):$/;"	m	class:XInterfaceBase	file:
 +__grabHotkeysForWindow	lib/autokey/interface.py	/^    def __grabHotkeysForWindow(self, window):$/;"	m	class:XInterfaceBase	file:
++__grabRecurse	.pc/trailing_newlines_fix_1/lib/autokey/interface.py	/^    def __grabRecurse(self, item, parent, checkWinInfo=True):$/;"	m	class:XInterfaceBase	file:
 +__grabRecurse	lib/autokey/interface.py	/^    def __grabRecurse(self, item, parent, checkWinInfo=True):$/;"	m	class:XInterfaceBase	file:
++__grab_keyboard	.pc/trailing_newlines_fix_1/lib/autokey/interface.py	/^    def __grab_keyboard(self):$/;"	m	class:XInterfaceBase	file:
 +__grab_keyboard	lib/autokey/interface.py	/^    def __grab_keyboard(self):$/;"	m	class:XInterfaceBase	file:
++__handleKeyPress	.pc/trailing_newlines_fix_1/lib/autokey/interface.py	/^    def __handleKeyPress(self, keyCode):$/;"	m	class:XInterfaceBase	file:
 +__handleKeyPress	lib/autokey/interface.py	/^    def __handleKeyPress(self, keyCode):$/;"	m	class:XInterfaceBase	file:
++__handleKeyrelease	.pc/trailing_newlines_fix_1/lib/autokey/interface.py	/^    def __handleKeyrelease(self, keyCode):$/;"	m	class:XInterfaceBase	file:
 +__handleKeyrelease	lib/autokey/interface.py	/^    def __handleKeyrelease(self, keyCode):$/;"	m	class:XInterfaceBase	file:
++__handleMouseclick	.pc/trailing_newlines_fix_1/lib/autokey/interface.py	/^    def __handleMouseclick(self, button, x, y):        $/;"	m	class:XInterfaceBase	file:
 +__handleMouseclick	lib/autokey/interface.py	/^    def __handleMouseclick(self, button, x, y):$/;"	m	class:XInterfaceBase	file:
 +__haveMatch	lib/autokey/service.py	/^    def __haveMatch(self, data):$/;"	m	class:Service	file:
++__initMappings	.pc/trailing_newlines_fix_1/lib/autokey/interface.py	/^    def __initMappings(self):$/;"	m	class:XInterfaceBase	file:
 +__initMappings	lib/autokey/interface.py	/^    def __initMappings(self):$/;"	m	class:XInterfaceBase	file:
 +__initStack	lib/autokey/gtkui/configwindow.py	/^    def __initStack(self):$/;"	m	class:ConfigWindow	file:
 +__initTreeWidget	lib/autokey/gtkui/configwindow.py	/^    def __initTreeWidget(self):$/;"	m	class:ConfigWindow	file:
++__init__	.pc/trailing_newlines_fix_1/lib/autokey/interface.py	/^    def __init__(self, mediator, app):$/;"	m	class:XInterfaceBase
++__init__	.pc/trailing_newlines_fix_1/lib/autokey/scripting.py	/^    def __init__(self, app):$/;"	m	class:GtkClipboard
++__init__	.pc/trailing_newlines_fix_1/lib/autokey/scripting.py	/^    def __init__(self, app):$/;"	m	class:QtClipboard
++__init__	.pc/trailing_newlines_fix_1/lib/autokey/scripting.py	/^    def __init__(self, configManager, runner):$/;"	m	class:Engine
++__init__	.pc/trailing_newlines_fix_1/lib/autokey/scripting.py	/^    def __init__(self, mediator):$/;"	m	class:Keyboard
++__init__	.pc/trailing_newlines_fix_1/lib/autokey/scripting.py	/^    def __init__(self, mediator):$/;"	m	class:Mouse
++__init__	.pc/trailing_newlines_fix_1/lib/autokey/scripting.py	/^    def __init__(self, mediator):$/;"	m	class:Window
 +__init__	doc/scripting/lib.scripting.Engine-class.html	/^          <td><span class="summary-sig"><a name="__init__"><\/a><span class="summary-sig-name">__init__<\/span>(<span class="summary-sig-arg">self<\/span>,$/;"	a
 +__init__	doc/scripting/lib.scripting.GtkClipboard-class.html	/^          <td><span class="summary-sig"><a name="__init__"><\/a><span class="summary-sig-name">__init__<\/span>(<span class="summary-sig-arg">self<\/span>,$/;"	a
 +__init__	doc/scripting/lib.scripting.Keyboard-class.html	/^          <td><span class="summary-sig"><a name="__init__"><\/a><span class="summary-sig-name">__init__<\/span>(<span class="summary-sig-arg">self<\/span>,$/;"	a
@@ -2230,27 +2398,37 @@ Last-Update: 2018-05-13
 +__itemSelected	lib/autokey/gtkui/popupmenu.py	/^    def __itemSelected(self, widget, item):$/;"	m	class:PopupMenu	file:
 +__loadHotkey	lib/autokey/gtkui/settingsdialog.py	/^    def __loadHotkey(self, item, label, dialog, clearButton):$/;"	m	class:SettingsDialog	file:
 +__loadHotkey	lib/autokey/qtui/settingsdialog.py	/^    def __loadHotkey(self, item, label, dialog, clearButton):$/;"	m	class:SpecialHotkeySettings	file:
++__lookupKeyCode	.pc/trailing_newlines_fix_1/lib/autokey/interface.py	/^    def __lookupKeyCode(self, char):$/;"	m	class:XInterfaceBase	file:
 +__lookupKeyCode	lib/autokey/interface.py	/^    def __lookupKeyCode(self, char):$/;"	m	class:XInterfaceBase	file:
 +__lt__	lib/autokey/qtui/configwindow.py	/^    def __lt__(self, other):$/;"	m	class:FolderWidgetItem	file:
 +__lt__	lib/autokey/qtui/configwindow.py	/^    def __lt__(self, other):$/;"	m	class:PhraseWidgetItem	file:
 +__lt__	lib/autokey/qtui/configwindow.py	/^    def __lt__(self, other):$/;"	m	class:ScriptWidgetItem	file:
 +__menuRequired	lib/autokey/service.py	/^    def __menuRequired(self, folders, items, buffer):$/;"	m	class:Service	file:
 +__moveRecurseUpdate	lib/autokey/qtui/configwindow.py	/^    def __moveRecurseUpdate(self, folder):$/;"	m	class:CentralWidget	file:
++__needsMutterWorkaround	.pc/trailing_newlines_fix_1/lib/autokey/interface.py	/^    def __needsMutterWorkaround(self, item):$/;"	m	class:XInterfaceBase	file:
 +__needsMutterWorkaround	lib/autokey/interface.py	/^    def __needsMutterWorkaround(self, item):$/;"	m	class:XInterfaceBase	file:
 +__package__	doc/scripting/lib.scripting-module.html	/^        <a name="__package__"><\/a><span class="summary-name">__package__<\/span> = <code title="'lib'"><code class="variable-quote">'<\/code><code class="variable-string">lib<\/code><code class="variable-quote">'<\/code><\/code>$/;"	a
 +__popupMenu	lib/autokey/gtkui/configwindow.py	/^    def __popupMenu(self, event):$/;"	m	class:ConfigWindow	file:
++__pressKey	.pc/trailing_newlines_fix_1/lib/autokey/interface.py	/^    def __pressKey(self, keyName):$/;"	m	class:XInterfaceBase	file:
 +__pressKey	lib/autokey/interface.py	/^    def __pressKey(self, keyName):$/;"	m	class:XInterfaceBase	file:
++__processEvent	.pc/trailing_newlines_fix_1/lib/autokey/interface.py	/^    def __processEvent(self, reply):$/;"	m	class:XRecordInterface	file:
 +__processEvent	lib/autokey/interface.py	/^    def __processEvent(self, reply):$/;"	m	class:XRecordInterface	file:
 +__processFolder	lib/autokey/configmanager.py	/^    def __processFolder(self, parentFolder):        $/;"	m	class:ConfigManager	file:
 +__processItem	lib/autokey/service.py	/^    def __processItem(self, item, buffer=''):$/;"	m	class:Service	file:
++__processKeyEvent	.pc/trailing_newlines_fix_1/lib/autokey/interface.py	/^    def __processKeyEvent(self, event):$/;"	m	class:AtSpiInterface	file:
 +__processKeyEvent	lib/autokey/interface.py	/^    def __processKeyEvent(self, event):$/;"	m	class:AtSpiInterface	file:
++__processMouseEvent	.pc/trailing_newlines_fix_1/lib/autokey/interface.py	/^    def __processMouseEvent(self, event):$/;"	m	class:AtSpiInterface	file:
 +__processMouseEvent	lib/autokey/interface.py	/^    def __processMouseEvent(self, event):$/;"	m	class:AtSpiInterface	file:
++__pumpEvents	.pc/trailing_newlines_fix_1/lib/autokey/interface.py	/^    def __pumpEvents(self):$/;"	m	class:AtSpiInterface	file:
 +__pumpEvents	lib/autokey/interface.py	/^    def __pumpEvents(self):$/;"	m	class:AtSpiInterface	file:
 +__reapplyModifiers	lib/autokey/iomediator/_iomediator.py	/^    def __reapplyModifiers(self):$/;"	m	class:IoMediator	file:
 +__receive	doc/scripting/lib.scripting.GtkClipboard-class.html	/^          <td><span class="summary-sig"><a name="__receive"><\/a><span class="summary-sig-name">__receive<\/span>(<span class="summary-sig-arg">self<\/span>,$/;"	a
 +__receiveWindowInfo	lib/autokey/qtui/dialogs.py	/^    def __receiveWindowInfo(self, info):$/;"	m	class:WindowFilterSettingsDialog	file:
++__recurseTree	.pc/trailing_newlines_fix_1/lib/autokey/interface.py	/^    def __recurseTree(self, parent, hotkeys):$/;"	m	class:XInterfaceBase	file:
 +__recurseTree	lib/autokey/interface.py	/^    def __recurseTree(self, parent, hotkeys):$/;"	m	class:XInterfaceBase	file:
++__recurseTreeUngrab	.pc/trailing_newlines_fix_1/lib/autokey/interface.py	/^    def __recurseTreeUngrab(self, parent, hotkeys):$/;"	m	class:XInterfaceBase	file:
 +__recurseTreeUngrab	lib/autokey/interface.py	/^    def __recurseTreeUngrab(self, parent, hotkeys):$/;"	m	class:XInterfaceBase	file:
++__releaseKey	.pc/trailing_newlines_fix_1/lib/autokey/interface.py	/^    def __releaseKey(self, keyName):$/;"	m	class:XInterfaceBase	file:
 +__releaseKey	lib/autokey/interface.py	/^    def __releaseKey(self, keyName):$/;"	m	class:XInterfaceBase	file:
 +__removeItem	lib/autokey/gtkui/configwindow.py	/^    def __removeItem(self, model, item):$/;"	m	class:ConfigWindow	file:
 +__removeItem	lib/autokey/qtui/configwindow.py	/^    def __removeItem(self, widgetItem):$/;"	m	class:CentralWidget	file:
@@ -2259,23 +2437,36 @@ Last-Update: 2018-05-13
 +__repr__	lib/autokey/model.py	/^    def __repr__(self):$/;"	m	class:Script	file:
 +__resetWordCharCombo	lib/autokey/gtkui/dialogs.py	/^    def __resetWordCharCombo(self):$/;"	m	class:AbbrSettingsDialog	file:
 +__resetWordCharCombo	lib/autokey/qtui/dialogs.py	/^    def __resetWordCharCombo(self):$/;"	m	class:AbbrSettingsDialog	file:
++__restoreClipboard	.pc/trailing_newlines_fix_1/lib/autokey/interface.py	/^    def __restoreClipboard(self):$/;"	m	class:XInterfaceBase	file:
 +__restoreClipboard	lib/autokey/interface.py	/^    def __restoreClipboard(self):$/;"	m	class:XInterfaceBase	file:
++__runKdialog	.pc/trailing_newlines_fix_1/lib/autokey/scripting.py	/^    def __runKdialog(self, title, args, kwargs):$/;"	m	class:QtDialog	file:
 +__runKdialog	doc/scripting/lib.scripting.QtDialog-class.html	/^          <td><span class="summary-sig"><a name="__runKdialog"><\/a><span class="summary-sig-name">__runKdialog<\/span>(<span class="summary-sig-arg">self<\/span>,$/;"	a
 +__runKdialog	lib/autokey/scripting.py	/^    def __runKdialog(self, title, args, kwargs):$/;"	m	class:QtDialog	file:
 +__runScript	lib/autokey/gtkui/configwindow.py	/^    def __runScript(self):$/;"	m	class:ConfigWindow	file:
 +__runScript	lib/autokey/qtui/configwindow.py	/^    def __runScript(self):$/;"	m	class:ConfigWindow	file:
++__runWmctrl	.pc/trailing_newlines_fix_1/lib/autokey/scripting.py	/^    def __runWmctrl(self, args):$/;"	m	class:Window	file:
 +__runWmctrl	doc/scripting/lib.scripting.Window-class.html	/^          <td><span class="summary-sig"><a name="__runWmctrl"><\/a><span class="summary-sig-name">__runWmctrl<\/span>(<span class="summary-sig-arg">self<\/span>,$/;"	a
 +__runWmctrl	lib/autokey/scripting.py	/^    def __runWmctrl(self, args):$/;"	m	class:Window	file:
++__runZenity	.pc/trailing_newlines_fix_1/lib/autokey/scripting.py	/^    def __runZenity(self, title, args, kwargs):$/;"	m	class:GtkDialog	file:
 +__runZenity	doc/scripting/lib.scripting.GtkDialog-class.html	/^          <td><span class="summary-sig"><a name="__runZenity"><\/a><span class="summary-sig-name">__runZenity<\/span>(<span class="summary-sig-arg">self<\/span>,$/;"	a
 +__runZenity	lib/autokey/scripting.py	/^    def __runZenity(self, title, args, kwargs):$/;"	m	class:GtkDialog	file:
++__sendKey	.pc/trailing_newlines_fix_1/lib/autokey/interface.py	/^    def __sendKey(self, keyName):$/;"	m	class:XInterfaceBase	file:
 +__sendKey	lib/autokey/interface.py	/^    def __sendKey(self, keyName):$/;"	m	class:XInterfaceBase	file:
++__sendKeyCode	.pc/trailing_newlines_fix_1/lib/autokey/interface.py	/^    def __sendKeyCode(self, keyCode, modifiers=0, theWindow=None):$/;"	m	class:XInterfaceBase	file:
 +__sendKeyCode	lib/autokey/interface.py	/^    def __sendKeyCode(self, keyCode, modifiers=0, theWindow=None):$/;"	m	class:XInterfaceBase	file:
++__sendKeyPressEvent	.pc/trailing_newlines_fix_1/lib/autokey/interface.py	/^    def __sendKeyPressEvent(self, keyCode, modifiers, theWindow=None):$/;"	m	class:XInterfaceBase	file:
 +__sendKeyPressEvent	lib/autokey/interface.py	/^    def __sendKeyPressEvent(self, keyCode, modifiers, theWindow=None):$/;"	m	class:XInterfaceBase	file:
++__sendKeyReleaseEvent	.pc/trailing_newlines_fix_1/lib/autokey/interface.py	/^    def __sendKeyReleaseEvent(self, keyCode, modifiers, theWindow=None):$/;"	m	class:XInterfaceBase	file:
 +__sendKeyReleaseEvent	lib/autokey/interface.py	/^    def __sendKeyReleaseEvent(self, keyCode, modifiers, theWindow=None):$/;"	m	class:XInterfaceBase	file:
++__sendModifiedKey	.pc/trailing_newlines_fix_1/lib/autokey/interface.py	/^    def __sendModifiedKey(self, keyName, modifiers):$/;"	m	class:XInterfaceBase	file:
 +__sendModifiedKey	lib/autokey/interface.py	/^    def __sendModifiedKey(self, keyName, modifiers):$/;"	m	class:XInterfaceBase	file:
++__sendMouseClick	.pc/trailing_newlines_fix_1/lib/autokey/interface.py	/^    def __sendMouseClick(self, xCoord, yCoord, button, relative):    $/;"	m	class:XInterfaceBase	file:
 +__sendMouseClick	lib/autokey/interface.py	/^    def __sendMouseClick(self, xCoord, yCoord, button, relative):$/;"	m	class:XInterfaceBase	file:
++__sendMouseClickRelative	.pc/trailing_newlines_fix_1/lib/autokey/interface.py	/^    def __sendMouseClickRelative(self, xoff, yoff, button):$/;"	m	class:XInterfaceBase	file:
 +__sendMouseClickRelative	lib/autokey/interface.py	/^    def __sendMouseClickRelative(self, xoff, yoff, button):$/;"	m	class:XInterfaceBase	file:
++__sendString	.pc/trailing_newlines_fix_1/lib/autokey/interface.py	/^    def __sendString(self, string):$/;"	m	class:XInterfaceBase	file:
 +__sendString	lib/autokey/interface.py	/^    def __sendString(self, string):$/;"	m	class:XInterfaceBase	file:
++__sendStringClipboard	.pc/trailing_newlines_fix_1/lib/autokey/interface.py	/^    def __sendStringClipboard(self, string, pasteCommand):$/;"	m	class:XInterfaceBase	file:
 +__sendStringClipboard	lib/autokey/interface.py	/^    def __sendStringClipboard(self, string, pasteCommand):$/;"	m	class:XInterfaceBase	file:
 +__shouldProcess	lib/autokey/service.py	/^    def __shouldProcess(self, windowInfo):$/;"	m	class:Service	file:
 +__str__	lib/autokey/configmanager.py	/^    def __str__(self):$/;"	m	class:GlobalHotkey	file:
@@ -2283,9 +2474,13 @@ Last-Update: 2018-05-13
 +__str__	lib/autokey/model.py	/^    def __str__(self):$/;"	m	class:Phrase	file:
 +__str__	lib/autokey/model.py	/^    def __str__(self):$/;"	m	class:Script	file:
 +__tryReleaseLock	lib/autokey/service.py	/^    def __tryReleaseLock(self):$/;"	m	class:Service	file:
++__ungrabAllHotkeys	.pc/trailing_newlines_fix_1/lib/autokey/interface.py	/^    def __ungrabAllHotkeys(self):$/;"	m	class:XInterfaceBase	file:
 +__ungrabAllHotkeys	lib/autokey/interface.py	/^    def __ungrabAllHotkeys(self):$/;"	m	class:XInterfaceBase	file:
++__ungrabHotkey	.pc/trailing_newlines_fix_1/lib/autokey/interface.py	/^    def __ungrabHotkey(self, key, modifiers, window):$/;"	m	class:XInterfaceBase	file:
 +__ungrabHotkey	lib/autokey/interface.py	/^    def __ungrabHotkey(self, key, modifiers, window):$/;"	m	class:XInterfaceBase	file:
++__ungrabKeyboard	.pc/trailing_newlines_fix_1/lib/autokey/interface.py	/^    def __ungrabKeyboard(self):$/;"	m	class:XInterfaceBase	file:
 +__ungrabKeyboard	lib/autokey/interface.py	/^    def __ungrabKeyboard(self):$/;"	m	class:XInterfaceBase	file:
++__ungrabRecurse	.pc/trailing_newlines_fix_1/lib/autokey/interface.py	/^    def __ungrabRecurse(self, item, parent, checkWinInfo=True):$/;"	m	class:XInterfaceBase	file:
 +__ungrabRecurse	lib/autokey/interface.py	/^    def __ungrabRecurse(self, item, parent, checkWinInfo=True):$/;"	m	class:XInterfaceBase	file:
 +__unsuspend	lib/autokey/monitor.py	/^    def __unsuspend(self):$/;"	m	class:FileMonitor	file:
 +__updateStack	lib/autokey/service.py	/^    def __updateStack(self, key):$/;"	m	class:Service	file:
@@ -2340,6 +2535,7 @@ Last-Update: 2018-05-13
 +_should_trigger_abbreviation	lib/autokey/model.py	/^    def _should_trigger_abbreviation(self, buffer):$/;"	m	class:AbstractAbbreviation
 +_should_trigger_window_title	lib/autokey/model.py	/^    def _should_trigger_window_title(self, windowInfo):$/;"	m	class:AbstractWindowFilter
 +acknowledge_gnome_notification	lib/autokey/scripting_highlevel.py	/^def acknowledge_gnome_notification():$/;"	f
++activate	.pc/trailing_newlines_fix_1/lib/autokey/scripting.py	/^    def activate(self, title, switchDesktop=False, matchClass=False):$/;"	m	class:Window
 +activate	doc/scripting/lib.scripting.Window-class.html	/^<a name="activate"><\/a>$/;"	a
 +activate	lib/autokey/scripting.py	/^    def activate(self, title, switchDesktop=False, matchClass=False):$/;"	m	class:Window
 +add_abbreviation	lib/autokey/model.py	/^    def add_abbreviation(self, abbr):$/;"	m	class:AbstractAbbreviation
@@ -2362,6 +2558,7 @@ Last-Update: 2018-05-13
 +author	setup.py	/^    author=R.AUTHOR,$/;"	v
 +author_email	setup.py	/^    author_email=R.AUTHOR_EMAIL,$/;"	v
 +auto_kill_doclink	doc/scripting/epydoc.js	/^function auto_kill_doclink(ev) {$/;"	f	function:function
++begin_send	.pc/trailing_newlines_fix_1/lib/autokey/interface.py	/^    def begin_send(self):$/;"	m	class:XInterfaceBase
 +begin_send	lib/autokey/interface.py	/^    def begin_send(self):$/;"	m	class:XInterfaceBase
 +build_menu	lib/autokey/qtui/notifier.py	/^    def build_menu(self):$/;"	m	class:Notifier
 +build_modifiers	lib/autokey/gtkui/dialogs.py	/^    def build_modifiers(self):$/;"	m	class:HotkeySettingsDialog
@@ -2373,11 +2570,16 @@ Last-Update: 2018-05-13
 +calculate_extra_keys	lib/autokey/service.py	/^    def calculate_extra_keys(self, buffer):$/;"	m	class:Service
 +calculate_input	lib/autokey/model.py	/^    def calculate_input(self, buffer):$/;"	m	class:Folder
 +calculate_input	lib/autokey/model.py	/^    def calculate_input(self, buffer):$/;"	m	class:Phrase
++calendar	.pc/trailing_newlines_fix_1/lib/autokey/scripting.py	/^    def calendar(self, title="Choose a date", format_str="%Y-%m-%d", date="today", **kwargs):$/;"	m	class:GtkDialog
++calendar	.pc/trailing_newlines_fix_1/lib/autokey/scripting.py	/^    def calendar(self, title="Choose a date", format_str="%Y-%m-%d", date="today", **kwargs):$/;"	m	class:QtDialog
 +calendar	doc/scripting/lib.scripting.GtkDialog-class.html	/^<a name="calendar"><\/a>$/;"	a
 +calendar	doc/scripting/lib.scripting.QtDialog-class.html	/^<a name="calendar"><\/a>$/;"	a
 +calendar	lib/autokey/scripting.py	/^    def calendar(self, title="Choose a date", format_str="%Y-%m-%d", date="today", **kwargs):$/;"	m	class:GtkDialog
 +calendar	lib/autokey/scripting.py	/^    def calendar(self, title="Choose a date", format_str="%Y-%m-%d", date="today", **kwargs):$/;"	m	class:QtDialog
 +can_undo	lib/autokey/service.py	/^    def can_undo(self):$/;"	m	class:PhraseRunner
++cancel	.pc/trailing_newlines_fix_1/lib/autokey/interface.py	/^    def cancel(self):$/;"	m	class:AtSpiInterface
++cancel	.pc/trailing_newlines_fix_1/lib/autokey/interface.py	/^    def cancel(self):$/;"	m	class:XInterfaceBase
++cancel	.pc/trailing_newlines_fix_1/lib/autokey/interface.py	/^    def cancel(self):$/;"	m	class:XRecordInterface
 +cancel	lib/autokey/interface.py	/^    def cancel(self):$/;"	m	class:AtSpiInterface
 +cancel	lib/autokey/interface.py	/^    def cancel(self):$/;"	m	class:XInterfaceBase
 +cancel	lib/autokey/interface.py	/^    def cancel(self):$/;"	m	class:XRecordInterface
@@ -2395,8 +2597,11 @@ Last-Update: 2018-05-13
 +check_input	lib/autokey/model.py	/^    def check_input(self, buffer, windowInfo):$/;"	m	class:Folder
 +check_input	lib/autokey/model.py	/^    def check_input(self, buffer, windowInfo):$/;"	m	class:Phrase
 +check_input	lib/autokey/model.py	/^    def check_input(self, buffer, windowInfo):$/;"	m	class:Script
++choose_colour	.pc/trailing_newlines_fix_1/lib/autokey/scripting.py	/^    def choose_colour(self, title="Select Colour", **kwargs):$/;"	m	class:QtDialog
 +choose_colour	doc/scripting/lib.scripting.QtDialog-class.html	/^<a name="choose_colour"><\/a>$/;"	a
 +choose_colour	lib/autokey/scripting.py	/^    def choose_colour(self, title="Select Colour", **kwargs):$/;"	m	class:QtDialog
++choose_directory	.pc/trailing_newlines_fix_1/lib/autokey/scripting.py	/^    def choose_directory(self, title="Select Directory", initialDir="~", **kwargs):$/;"	m	class:GtkDialog
++choose_directory	.pc/trailing_newlines_fix_1/lib/autokey/scripting.py	/^    def choose_directory(self, title="Select Directory", initialDir="~", rememberAs=None, **kwargs):$/;"	m	class:QtDialog
 +choose_directory	doc/scripting/lib.scripting.GtkDialog-class.html	/^<a name="choose_directory"><\/a>$/;"	a
 +choose_directory	doc/scripting/lib.scripting.QtDialog-class.html	/^<a name="choose_directory"><\/a>$/;"	a
 +choose_directory	lib/autokey/scripting.py	/^    def choose_directory(self, title="Select Directory", initialDir="~", **kwargs):$/;"	m	class:GtkDialog
@@ -2404,16 +2609,21 @@ Last-Update: 2018-05-13
 +classifiers	setup.py	/^    classifiers=[$/;"	v
 +clear_abbreviations	lib/autokey/model.py	/^    def clear_abbreviations(self):$/;"	m	class:AbstractAbbreviation
 +clear_last	lib/autokey/service.py	/^    def clear_last(self):$/;"	m	class:PhraseRunner
++click_absolute	.pc/trailing_newlines_fix_1/lib/autokey/scripting.py	/^    def click_absolute(self, x, y, button):$/;"	m	class:Mouse
 +click_absolute	doc/scripting/lib.scripting.Mouse-class.html	/^<a name="click_absolute"><\/a>$/;"	a
 +click_absolute	lib/autokey/scripting.py	/^    def click_absolute(self, x, y, button):$/;"	m	class:Mouse
 +click_on_pat	lib/autokey/scripting_highlevel.py	/^def click_on_pat(pat: str, mousebutton: int=1, offset: (float, float)=None, tolerance: int=0, restore_pos: bool=False) -> None:$/;"	f
++click_relative	.pc/trailing_newlines_fix_1/lib/autokey/scripting.py	/^    def click_relative(self, x, y, button):$/;"	m	class:Mouse
 +click_relative	doc/scripting/lib.scripting.Mouse-class.html	/^<a name="click_relative"><\/a>$/;"	a
 +click_relative	lib/autokey/scripting.py	/^    def click_relative(self, x, y, button):$/;"	m	class:Mouse
++click_relative_self	.pc/trailing_newlines_fix_1/lib/autokey/scripting.py	/^    def click_relative_self(self, x, y, button):$/;"	m	class:Mouse
 +click_relative_self	doc/scripting/lib.scripting.Mouse-class.html	/^<a name="click_relative_self"><\/a>$/;"	a
 +click_relative_self	lib/autokey/scripting.py	/^    def click_relative_self(self, x, y, button):$/;"	m	class:Mouse
++close	.pc/trailing_newlines_fix_1/lib/autokey/scripting.py	/^    def close(self, title, matchClass=False):$/;"	m	class:Window
 +close	doc/scripting/lib.scripting.Window-class.html	/^<a name="close"><\/a>$/;"	a
 +close	lib/autokey/scripting.py	/^    def close(self, title, matchClass=False):$/;"	m	class:Window
 +collapse_all	doc/scripting/epydoc.js	/^function collapse_all(min_lines) {$/;"	f	function:function
++combo_menu	.pc/trailing_newlines_fix_1/lib/autokey/scripting.py	/^    def combo_menu(self, options, title="Choose an option", message="Choose an option", **kwargs):$/;"	m	class:QtDialog
 +combo_menu	doc/scripting/lib.scripting.QtDialog-class.html	/^<a name="combo_menu"><\/a>$/;"	a
 +combo_menu	lib/autokey/scripting.py	/^    def combo_menu(self, options, title="Choose an option", message="Choose an option", **kwargs):$/;"	m	class:QtDialog
 +compare	lib/autokey/gtkui/configwindow.py	/^    def compare(self, theModel, iter1, iter2, data=None):$/;"	m	class:AkTreeModel
@@ -2428,12 +2638,16 @@ Last-Update: 2018-05-13
 +copy_abbreviation	lib/autokey/model.py	/^    def copy_abbreviation(self, abbr):$/;"	m	class:AbstractAbbreviation
 +copy_hotkey	lib/autokey/model.py	/^    def copy_hotkey(self, theHotkey):$/;"	m	class:AbstractHotkey
 +copy_window_filter	lib/autokey/model.py	/^    def copy_window_filter(self, window_filter):$/;"	m	class:AbstractWindowFilter
++create_abbreviation	.pc/trailing_newlines_fix_1/lib/autokey/scripting.py	/^    def create_abbreviation(self, folder, description, abbr, contents):$/;"	m	class:Engine
 +create_abbreviation	doc/scripting/lib.scripting.Engine-class.html	/^<a name="create_abbreviation"><\/a>$/;"	a
 +create_abbreviation	lib/autokey/scripting.py	/^    def create_abbreviation(self, folder, description, abbr, contents):$/;"	m	class:Engine
++create_file	.pc/trailing_newlines_fix_1/lib/autokey/scripting.py	/^    def create_file(self, fileName, contents=""):$/;"	m	class:System
 +create_file	doc/scripting/lib.scripting.System-class.html	/^<a name="create_file"><\/a>$/;"	a
 +create_file	lib/autokey/scripting.py	/^    def create_file(self, fileName, contents=""):$/;"	m	class:System
++create_hotkey	.pc/trailing_newlines_fix_1/lib/autokey/scripting.py	/^    def create_hotkey(self, folder, description, modifiers, key, contents):$/;"	m	class:Engine
 +create_hotkey	doc/scripting/lib.scripting.Engine-class.html	/^<a name="create_hotkey"><\/a>$/;"	a
 +create_hotkey	lib/autokey/scripting.py	/^    def create_hotkey(self, folder, description, modifiers, key, contents):$/;"	m	class:Engine
++create_phrase	.pc/trailing_newlines_fix_1/lib/autokey/scripting.py	/^    def create_phrase(self, folder, description, contents):$/;"	m	class:Engine
 +create_phrase	doc/scripting/lib.scripting.Engine-class.html	/^<a name="create_phrase"><\/a>$/;"	a
 +create_phrase	lib/autokey/scripting.py	/^    def create_phrase(self, folder, description, contents):$/;"	m	class:Engine
 +customEvent	lib/autokey/qtapp.py	/^    def customEvent(self, event):$/;"	m	class:CallbackEventHandler
@@ -2456,6 +2670,7 @@ Last-Update: 2018-05-13
 +end_key_sequence	lib/autokey/qtui/configwindow.py	/^    def end_key_sequence(self):$/;"	m	class:ScriptPage
 +entry_points	setup.py	/^    entry_points = {$/;"	v
 +eventFilter	lib/autokey/qtapp.py	/^    def eventFilter(self, obj, event):$/;"	m	class:KeyboardChangeFilter
++exec_command	.pc/trailing_newlines_fix_1/lib/autokey/scripting.py	/^    def exec_command(self, command, getOutput=True):$/;"	m	class:System
 +exec_command	doc/scripting/lib.scripting.System-class.html	/^<a name="exec_command"><\/a>$/;"	a
 +exec_command	lib/autokey/scripting.py	/^    def exec_command(self, command, getOutput=True):$/;"	m	class:System
 +exec_in_main	lib/autokey/qtapp.py	/^    def exec_in_main(self, callback, *args):$/;"	m	class:Application
@@ -2464,22 +2679,32 @@ Last-Update: 2018-05-13
 +expand	doc/scripting/epydoc.js	/^function expand(id) {$/;"	f
 +expandto	doc/scripting/epydoc.js	/^function expandto(href) {$/;"	f	function:function
 +extract_wordchars	lib/autokey/model.py	/^def extract_wordchars(regex):$/;"	f
++fake_keydown	.pc/trailing_newlines_fix_1/lib/autokey/interface.py	/^    def fake_keydown(self, keyName):$/;"	m	class:XInterfaceBase
 +fake_keydown	lib/autokey/interface.py	/^    def fake_keydown(self, keyName):$/;"	m	class:XInterfaceBase
++fake_keypress	.pc/trailing_newlines_fix_1/lib/autokey/interface.py	/^    def fake_keypress(self, keyName):$/;"	m	class:XInterfaceBase
++fake_keypress	.pc/trailing_newlines_fix_1/lib/autokey/scripting.py	/^    def fake_keypress(self, key, repeat=1):$/;"	m	class:Keyboard
 +fake_keypress	doc/scripting/lib.scripting.Keyboard-class.html	/^<a name="fake_keypress"><\/a>$/;"	a
 +fake_keypress	lib/autokey/interface.py	/^    def fake_keypress(self, keyName):$/;"	m	class:XInterfaceBase
 +fake_keypress	lib/autokey/iomediator/_iomediator.py	/^    def fake_keypress(self, keyName):$/;"	m	class:IoMediator
 +fake_keypress	lib/autokey/scripting.py	/^    def fake_keypress(self, key, repeat=1):$/;"	m	class:Keyboard
++fake_keyup	.pc/trailing_newlines_fix_1/lib/autokey/interface.py	/^    def fake_keyup(self, keyName):$/;"	m	class:XInterfaceBase
 +fake_keyup	lib/autokey/interface.py	/^    def fake_keyup(self, keyName):$/;"	m	class:XInterfaceBase
++fill_clipboard	.pc/trailing_newlines_fix_1/lib/autokey/scripting.py	/^    def fill_clipboard(self, contents):$/;"	m	class:GtkClipboard
++fill_clipboard	.pc/trailing_newlines_fix_1/lib/autokey/scripting.py	/^    def fill_clipboard(self, contents):$/;"	m	class:QtClipboard
 +fill_clipboard	doc/scripting/lib.scripting.GtkClipboard-class.html	/^<a name="fill_clipboard"><\/a>$/;"	a
 +fill_clipboard	doc/scripting/lib.scripting.QtClipboard-class.html	/^<a name="fill_clipboard"><\/a>$/;"	a
 +fill_clipboard	lib/autokey/scripting.py	/^    def fill_clipboard(self, contents):$/;"	m	class:GtkClipboard
 +fill_clipboard	lib/autokey/scripting.py	/^    def fill_clipboard(self, contents):$/;"	m	class:QtClipboard
++fill_selection	.pc/trailing_newlines_fix_1/lib/autokey/scripting.py	/^    def fill_selection(self, contents):$/;"	m	class:GtkClipboard
++fill_selection	.pc/trailing_newlines_fix_1/lib/autokey/scripting.py	/^    def fill_selection(self, contents):$/;"	m	class:QtClipboard
 +fill_selection	doc/scripting/lib.scripting.GtkClipboard-class.html	/^<a name="fill_selection"><\/a>$/;"	a
 +fill_selection	doc/scripting/lib.scripting.QtClipboard-class.html	/^<a name="fill_selection"><\/a>$/;"	a
 +fill_selection	lib/autokey/scripting.py	/^    def fill_selection(self, contents):$/;"	m	class:GtkClipboard
 +fill_selection	lib/autokey/scripting.py	/^    def fill_selection(self, contents):$/;"	m	class:QtClipboard
 +filter_matches	lib/autokey/model.py	/^    def filter_matches(self, otherFilter):$/;"	m	class:AbstractWindowFilter
++finish_send	.pc/trailing_newlines_fix_1/lib/autokey/interface.py	/^    def finish_send(self):$/;"	m	class:XInterfaceBase
 +finish_send	lib/autokey/interface.py	/^    def finish_send(self):$/;"	m	class:XInterfaceBase
++flush	.pc/trailing_newlines_fix_1/lib/autokey/interface.py	/^    def flush(self):$/;"	m	class:XInterfaceBase
 +flush	lib/autokey/interface.py	/^    def flush(self):$/;"	m	class:XInterfaceBase
 +flush	lib/autokey/iomediator/_iomediator.py	/^    def flush(self):$/;"	m	class:IoMediator
 +flush	lib/autokey/qtui/configwindow.py	/^    def flush(self):$/;"	m	class:ListWidgetHandler
@@ -2489,10 +2714,13 @@ Last-Update: 2018-05-13
 +get_abbrs	lib/autokey/qtui/dialogs.py	/^    def get_abbrs(self):$/;"	m	class:AbbrSettingsDialog
 +get_abbrs_readable	lib/autokey/gtkui/dialogs.py	/^    def get_abbrs_readable(self):$/;"	m	class:AbbrSettingsDialog
 +get_abbrs_readable	lib/autokey/qtui/dialogs.py	/^    def get_abbrs_readable(self):$/;"	m	class:AbbrSettingsDialog
++get_active_class	.pc/trailing_newlines_fix_1/lib/autokey/scripting.py	/^    def get_active_class(self):$/;"	m	class:Window
 +get_active_class	doc/scripting/lib.scripting.Window-class.html	/^<a name="get_active_class"><\/a>$/;"	a
 +get_active_class	lib/autokey/scripting.py	/^    def get_active_class(self):$/;"	m	class:Window
++get_active_geometry	.pc/trailing_newlines_fix_1/lib/autokey/scripting.py	/^    def get_active_geometry(self):$/;"	m	class:Window
 +get_active_geometry	doc/scripting/lib.scripting.Window-class.html	/^<a name="get_active_geometry"><\/a>$/;"	a
 +get_active_geometry	lib/autokey/scripting.py	/^    def get_active_geometry(self):$/;"	m	class:Window
++get_active_title	.pc/trailing_newlines_fix_1/lib/autokey/scripting.py	/^    def get_active_title(self):$/;"	m	class:Window
 +get_active_title	doc/scripting/lib.scripting.Window-class.html	/^<a name="get_active_title"><\/a>$/;"	a
 +get_active_title	lib/autokey/scripting.py	/^    def get_active_title(self):$/;"	m	class:Window
 +get_anchor	doc/scripting/epydoc.js	/^function get_anchor() {$/;"	f	function:collapse
@@ -2501,6 +2729,8 @@ Last-Update: 2018-05-13
 +get_child_filter	lib/autokey/model.py	/^    def get_child_filter(self):$/;"	m	class:AbstractWindowFilter
 +get_choice	lib/autokey/gtkui/dialogs.py	/^    def get_choice(self):$/;"	m	class:DetectDialog
 +get_choice	lib/autokey/qtui/dialogs.py	/^    def get_choice(self):$/;"	m	class:DetectDialog
++get_clipboard	.pc/trailing_newlines_fix_1/lib/autokey/scripting.py	/^    def get_clipboard(self):$/;"	m	class:GtkClipboard
++get_clipboard	.pc/trailing_newlines_fix_1/lib/autokey/scripting.py	/^    def get_clipboard(self):$/;"	m	class:QtClipboard
 +get_clipboard	doc/scripting/lib.scripting.GtkClipboard-class.html	/^<a name="get_clipboard"><\/a>$/;"	a
 +get_clipboard	doc/scripting/lib.scripting.QtClipboard-class.html	/^<a name="get_clipboard"><\/a>$/;"	a
 +get_clipboard	lib/autokey/scripting.py	/^    def get_clipboard(self):$/;"	m	class:GtkClipboard
@@ -2513,6 +2743,7 @@ Last-Update: 2018-05-13
 +get_filter_regex	lib/autokey/model.py	/^    def get_filter_regex(self):$/;"	m	class:AbstractWindowFilter
 +get_filter_text	lib/autokey/gtkui/dialogs.py	/^    def get_filter_text(self):$/;"	m	class:WindowFilterSettingsDialog
 +get_filter_text	lib/autokey/qtui/dialogs.py	/^    def get_filter_text(self):$/;"	m	class:WindowFilterSettingsDialog
++get_folder	.pc/trailing_newlines_fix_1/lib/autokey/scripting.py	/^    def get_folder(self, title):$/;"	m	class:Engine
 +get_folder	doc/scripting/lib.scripting.Engine-class.html	/^<a name="get_folder"><\/a>$/;"	a
 +get_folder	lib/autokey/scripting.py	/^    def get_folder(self, title):$/;"	m	class:Engine
 +get_global_value	doc/scripting/lib.scripting.Store-class.html	/^<a name="get_global_value"><\/a>$/;"	a
@@ -2523,6 +2754,7 @@ Last-Update: 2018-05-13
 +get_is_recursive	lib/autokey/qtui/dialogs.py	/^    def get_is_recursive(self):$/;"	m	class:WindowFilterSettingsDialog
 +get_json_path	lib/autokey/model.py	/^    def get_json_path(self):$/;"	m	class:Phrase
 +get_json_path	lib/autokey/model.py	/^    def get_json_path(self):$/;"	m	class:Script
++get_macro_arguments	.pc/trailing_newlines_fix_1/lib/autokey/scripting.py	/^    def get_macro_arguments(self):$/;"	m	class:Engine
 +get_macro_arguments	doc/scripting/lib.scripting.Engine-class.html	/^<a name="get_macro_arguments"><\/a>$/;"	a
 +get_macro_arguments	lib/autokey/scripting.py	/^    def get_macro_arguments(self):$/;"	m	class:Engine
 +get_menu	lib/autokey/macro.py	/^    def get_menu(self, callback, menu=None):$/;"	m	class:MacroManager
@@ -2533,11 +2765,14 @@ Last-Update: 2018-05-13
 +get_record_keyboard	lib/autokey/qtui/dialogs.py	/^    def get_record_keyboard(self):$/;"	m	class:RecordDialog
 +get_record_mouse	lib/autokey/gtkui/dialogs.py	/^    def get_record_mouse(self):$/;"	m	class:RecordDialog
 +get_record_mouse	lib/autokey/qtui/dialogs.py	/^    def get_record_mouse(self):$/;"	m	class:RecordDialog
++get_return_value	.pc/trailing_newlines_fix_1/lib/autokey/scripting.py	/^    def get_return_value(self):$/;"	m	class:Engine
 +get_return_value	doc/scripting/lib.scripting.Engine-class.html	/^          <td><span class="summary-sig"><a name="get_return_value"><\/a><span class="summary-sig-name">get_return_value<\/span>(<span class="summary-sig-arg">self<\/span>)<\/span><br \/>$/;"	a
 +get_return_value	lib/autokey/scripting.py	/^    def get_return_value(self):$/;"	m	class:Engine
 +get_root_folder_list	lib/autokey/qtui/configwindow.py	/^    def get_root_folder_list(self):$/;"	m	class:WidgetItemFactory
 +get_safe_path	lib/autokey/model.py	/^def get_safe_path(basePath, name, ext=""):$/;"	f
 +get_selected_item	lib/autokey/qtui/configwindow.py	/^    def get_selected_item(self):$/;"	m	class:CentralWidget
++get_selection	.pc/trailing_newlines_fix_1/lib/autokey/scripting.py	/^    def get_selection(self):$/;"	m	class:GtkClipboard
++get_selection	.pc/trailing_newlines_fix_1/lib/autokey/scripting.py	/^    def get_selection(self):$/;"	m	class:QtClipboard
 +get_selection	doc/scripting/lib.scripting.GtkClipboard-class.html	/^<a name="get_selection"><\/a>$/;"	a
 +get_selection	doc/scripting/lib.scripting.QtClipboard-class.html	/^<a name="get_selection"><\/a>$/;"	a
 +get_selection	lib/autokey/scripting.py	/^    def get_selection(self):$/;"	m	class:GtkClipboard
@@ -2560,11 +2795,16 @@ Last-Update: 2018-05-13
 +get_value	doc/scripting/lib.scripting.Store-class.html	/^<a name="get_value"><\/a>$/;"	a
 +get_value	lib/autokey/scripting_Store.py	/^    def get_value(self, key):$/;"	m	class:Store
 +get_value_or_default	lib/autokey/model.py	/^def get_value_or_default(jsonData, key, default):$/;"	f
++get_window_class	.pc/trailing_newlines_fix_1/lib/autokey/interface.py	/^    def get_window_class(self, window=None, traverse=True):$/;"	m	class:XInterfaceBase
 +get_window_class	lib/autokey/interface.py	/^    def get_window_class(self, window=None, traverse=True):$/;"	m	class:XInterfaceBase
++get_window_title	.pc/trailing_newlines_fix_1/lib/autokey/interface.py	/^    def get_window_title(self, window=None, traverse=True):$/;"	m	class:XInterfaceBase
 +get_window_title	lib/autokey/interface.py	/^    def get_window_title(self, window=None, traverse=True):$/;"	m	class:XInterfaceBase
 +get_word_chars	lib/autokey/model.py	/^    def get_word_chars(self):$/;"	m	class:AbstractAbbreviation
++grab_hotkey	.pc/trailing_newlines_fix_1/lib/autokey/interface.py	/^    def grab_hotkey(self, item):$/;"	m	class:XInterfaceBase
 +grab_hotkey	lib/autokey/interface.py	/^    def grab_hotkey(self, item):$/;"	m	class:XInterfaceBase
++grab_keyboard	.pc/trailing_newlines_fix_1/lib/autokey/interface.py	/^    def grab_keyboard(self):$/;"	m	class:XInterfaceBase
 +grab_keyboard	lib/autokey/interface.py	/^    def grab_keyboard(self):$/;"	m	class:XInterfaceBase
++handle_keypress	.pc/trailing_newlines_fix_1/lib/autokey/interface.py	/^    def handle_keypress(self, keyCode):$/;"	m	class:XInterfaceBase
 +handle_keypress	lib/autokey/interface.py	/^    def handle_keypress(self, keyCode):$/;"	m	class:XInterfaceBase
 +handle_keypress	lib/autokey/iomediator/_iomediator.py	/^    def handle_keypress(self, keyCode, windowName, windowClass):$/;"	m	class:IoMediator
 +handle_keypress	lib/autokey/iomediator/_keygrabber.py	/^    def handle_keypress(self, rawKey, modifiers, key, *args):$/;"	m	class:KeyGrabber
@@ -2573,10 +2813,12 @@ Last-Update: 2018-05-13
 +handle_keypress	lib/autokey/iomediator/_windowgrabber.py	/^    def handle_keypress(self, rawKey, modifiers, key, *args):$/;"	m	class:WindowGrabber
 +handle_keypress	lib/autokey/service.py	/^    def handle_keypress(self, rawKey, modifiers, key, windowName, windowClass):$/;"	m	class:Service
 +handle_keypress	test/interfacetest.py	/^    def handle_keypress(self, key):$/;"	m	class:MockService
++handle_keyrelease	.pc/trailing_newlines_fix_1/lib/autokey/interface.py	/^    def handle_keyrelease(self, keyCode):$/;"	m	class:XInterfaceBase
 +handle_keyrelease	lib/autokey/interface.py	/^    def handle_keyrelease(self, keyCode):$/;"	m	class:XInterfaceBase
 +handle_modifier_down	lib/autokey/iomediator/_iomediator.py	/^    def handle_modifier_down(self, modifier):$/;"	m	class:IoMediator
 +handle_modifier_up	lib/autokey/iomediator/_iomediator.py	/^    def handle_modifier_up(self, modifier):$/;"	m	class:IoMediator
 +handle_mouse_click	lib/autokey/iomediator/_iomediator.py	/^    def handle_mouse_click(self, rootX, rootY, relX, relY, button, windowInfo):$/;"	m	class:IoMediator
++handle_mouseclick	.pc/trailing_newlines_fix_1/lib/autokey/interface.py	/^    def handle_mouseclick(self, button, x, y):$/;"	m	class:XInterfaceBase
 +handle_mouseclick	lib/autokey/interface.py	/^    def handle_mouseclick(self, button, x, y):$/;"	m	class:XInterfaceBase
 +handle_mouseclick	lib/autokey/iomediator/_keygrabber.py	/^    def handle_mouseclick(self, rootX, rootY, relX, relY, button, windowInfo):$/;"	m	class:KeyGrabber
 +handle_mouseclick	lib/autokey/iomediator/_keygrabber.py	/^    def handle_mouseclick(self, rootX, rootY, relX, relY, button, windowInfo):$/;"	m	class:Recorder
@@ -2596,6 +2838,8 @@ Last-Update: 2018-05-13
 +hotkey_removed	lib/autokey/gtkapp.py	/^    def hotkey_removed(self, item):$/;"	m	class:Application
 +hotkey_removed	lib/autokey/qtapp.py	/^    def hotkey_removed(self, item):$/;"	m	class:Application
 +increment_usage_count	lib/autokey/model.py	/^    def increment_usage_count(self):$/;"	m	class:Folder
++info_dialog	.pc/trailing_newlines_fix_1/lib/autokey/scripting.py	/^    def info_dialog(self, title="Information", message="", **kwargs):$/;"	m	class:GtkDialog
++info_dialog	.pc/trailing_newlines_fix_1/lib/autokey/scripting.py	/^    def info_dialog(self, title="Information", message="", **kwargs):$/;"	m	class:QtDialog
 +info_dialog	doc/scripting/lib.scripting.GtkDialog-class.html	/^<a name="info_dialog"><\/a>$/;"	a
 +info_dialog	doc/scripting/lib.scripting.QtDialog-class.html	/^<a name="info_dialog"><\/a>$/;"	a
 +info_dialog	lib/autokey/scripting.py	/^    def info_dialog(self, title="Information", message="", **kwargs):$/;"	m	class:GtkDialog
@@ -2603,6 +2847,8 @@ Last-Update: 2018-05-13
 +inherits_filter	lib/autokey/model.py	/^    def inherits_filter(self):$/;"	m	class:AbstractWindowFilter
 +init_global_hotkeys	lib/autokey/gtkapp.py	/^    def init_global_hotkeys(self, configManager):$/;"	m	class:Application
 +init_global_hotkeys	lib/autokey/qtapp.py	/^    def init_global_hotkeys(self, configManager):$/;"	m	class:Application
++initialise	.pc/trailing_newlines_fix_1/lib/autokey/interface.py	/^    def initialise(self):$/;"	m	class:AtSpiInterface
++initialise	.pc/trailing_newlines_fix_1/lib/autokey/interface.py	/^    def initialise(self):$/;"	m	class:XRecordInterface
 +initialise	lib/autokey/gtkapp.py	/^    def initialise(self, configure):$/;"	m	class:Application
 +initialise	lib/autokey/interface.py	/^    def initialise(self):$/;"	m	class:AtSpiInterface
 +initialise	lib/autokey/interface.py	/^    def initialise(self):$/;"	m	class:XRecordInterface
@@ -2610,6 +2856,8 @@ Last-Update: 2018-05-13
 +inject_json_data	lib/autokey/model.py	/^    def inject_json_data(self, data):$/;"	m	class:Folder
 +inject_json_data	lib/autokey/model.py	/^    def inject_json_data(self, data):$/;"	m	class:Phrase
 +inject_json_data	lib/autokey/model.py	/^    def inject_json_data(self, data):$/;"	m	class:Script
++input_dialog	.pc/trailing_newlines_fix_1/lib/autokey/scripting.py	/^    def input_dialog(self, title="Enter a value", message="Enter a value", default="", **kwargs):$/;"	m	class:GtkDialog
++input_dialog	.pc/trailing_newlines_fix_1/lib/autokey/scripting.py	/^    def input_dialog(self, title="Enter a value", message="Enter a value", default="", **kwargs):$/;"	m	class:QtDialog
 +input_dialog	doc/scripting/lib.scripting.GtkDialog-class.html	/^<a name="input_dialog"><\/a>$/;"	a
 +input_dialog	doc/scripting/lib.scripting.QtDialog-class.html	/^<a name="input_dialog"><\/a>$/;"	a
 +input_dialog	lib/autokey/scripting.py	/^    def input_dialog(self, title="Enter a value", message="Enter a value", default="", **kwargs):$/;"	m	class:GtkDialog
@@ -2628,14 +2876,19 @@ Last-Update: 2018-05-13
 +is_suspended	lib/autokey/monitor.py	/^    def is_suspended(self):$/;"	m	class:FileMonitor
 +item_selected	lib/autokey/service.py	/^    def item_selected(self, item):$/;"	m	class:Service
 +keyPressEvent	lib/autokey/qtui/configwindow.py	/^    def keyPressEvent(self, event):$/;"	m	class:AkTreeWidget
++keymap_test	.pc/trailing_newlines_fix_1/lib/autokey/interface.py	/^    def keymap_test(self):$/;"	m	class:XInterfaceBase
 +keymap_test	lib/autokey/interface.py	/^    def keymap_test(self):$/;"	m	class:XInterfaceBase
 +kill_doclink	doc/scripting/epydoc.js	/^function kill_doclink(id) {$/;"	f	function:function
 +license	setup.py	/^    license='GPLv3',$/;"	v
 +lines	extractDoc.py	/^                    lines = doc.split('\\n')$/;"	v
++list_menu	.pc/trailing_newlines_fix_1/lib/autokey/scripting.py	/^    def list_menu(self, options, title="Choose a value", message="Choose a value", default=None, **kwargs):$/;"	m	class:GtkDialog
++list_menu	.pc/trailing_newlines_fix_1/lib/autokey/scripting.py	/^    def list_menu(self, options, title="Choose a value", message="Choose a value", default=None, **kwargs):$/;"	m	class:QtDialog
 +list_menu	doc/scripting/lib.scripting.GtkDialog-class.html	/^<a name="list_menu"><\/a>$/;"	a
 +list_menu	doc/scripting/lib.scripting.QtDialog-class.html	/^<a name="list_menu"><\/a>$/;"	a
 +list_menu	lib/autokey/scripting.py	/^    def list_menu(self, options, title="Choose a value", message="Choose a value", default=None, **kwargs):$/;"	m	class:GtkDialog
 +list_menu	lib/autokey/scripting.py	/^    def list_menu(self, options, title="Choose a value", message="Choose a value", default=None, **kwargs):$/;"	m	class:QtDialog
++list_menu_multi	.pc/trailing_newlines_fix_1/lib/autokey/scripting.py	/^    def list_menu_multi(self, options, title="Choose one or more values", message="Choose one or more values",$/;"	m	class:GtkDialog
++list_menu_multi	.pc/trailing_newlines_fix_1/lib/autokey/scripting.py	/^    def list_menu_multi(self, options, title="Choose one or more values", message="Choose one or more values",$/;"	m	class:QtDialog
 +list_menu_multi	doc/scripting/lib.scripting.GtkDialog-class.html	/^<a name="list_menu_multi"><\/a>$/;"	a
 +list_menu_multi	doc/scripting/lib.scripting.QtDialog-class.html	/^<a name="list_menu_multi"><\/a>$/;"	a
 +list_menu_multi	lib/autokey/scripting.py	/^    def list_menu_multi(self, options, title="Choose one or more values", message="Choose one or more values",$/;"	m	class:GtkDialog
@@ -2670,8 +2923,10 @@ Last-Update: 2018-05-13
 +load_from_serialized	lib/autokey/model.py	/^    def load_from_serialized(self, data):$/;"	m	class:AbstractHotkey
 +load_from_serialized	lib/autokey/model.py	/^    def load_from_serialized(self, data):$/;"	m	class:AbstractWindowFilter
 +load_global_config	lib/autokey/configmanager.py	/^    def load_global_config(self):$/;"	m	class:ConfigManager
++logger	.pc/trailing_newlines_fix_1/lib/autokey/interface.py	/^logger = logging.getLogger("interface")$/;"	v
 +logger	lib/autokey/interface.py	/^logger = logging.getLogger("interface")$/;"	v
 +logger	lib/autokey/service.py	/^logger = logging.getLogger("service")$/;"	v
++lookup_string	.pc/trailing_newlines_fix_1/lib/autokey/interface.py	/^    def lookup_string(self, keyCode, shifted, numlock, altGrid):$/;"	m	class:XInterfaceBase
 +lookup_string	lib/autokey/interface.py	/^    def lookup_string(self, keyCode, shifted, numlock, altGrid):$/;"	m	class:XInterfaceBase
 +m	lib/autokey/monitor.py	/^m = EventsCodes.OP_FLAGS$/;"	v
 +main	lib/autokey/gtkapp.py	/^    def main(self):$/;"	m	class:Application
@@ -2686,6 +2941,7 @@ Last-Update: 2018-05-13
 +mouse_pos	lib/autokey/scripting_highlevel.py	/^def mouse_pos():$/;"	f
 +mouse_rmove	lib/autokey/scripting_highlevel.py	/^def mouse_rmove(x: int, y: int, display: str=''):$/;"	f
 +move_items	lib/autokey/qtui/configwindow.py	/^    def move_items(self, sourceItems, target):$/;"	m	class:CentralWidget
++move_to_desktop	.pc/trailing_newlines_fix_1/lib/autokey/scripting.py	/^    def move_to_desktop(self, title, deskNum, matchClass=False):$/;"	m	class:Window
 +move_to_desktop	doc/scripting/lib.scripting.Window-class.html	/^<a name="move_to_desktop"><\/a>$/;"	a
 +move_to_desktop	lib/autokey/scripting.py	/^    def move_to_desktop(self, title, deskNum, matchClass=False):$/;"	m	class:Window
 +move_to_pat	lib/autokey/scripting_highlevel.py	/^def move_to_pat(pat: str, offset: (float, float)=None, tolerance: int=0) -> None:$/;"	f
@@ -2755,6 +3011,7 @@ Last-Update: 2018-05-13
 +on_immediateCheckbox_stateChanged	lib/autokey/qtui/dialogs.py	/^    def on_immediateCheckbox_stateChanged(self, state):$/;"	m	class:AbbrSettings
 +on_insert_macro	lib/autokey/gtkui/configwindow.py	/^    def on_insert_macro(self, widget, macro):$/;"	m	class:ConfigWindow
 +on_insert_macro	lib/autokey/qtui/configwindow.py	/^    def on_insert_macro(self, macro):$/;"	m	class:ConfigWindow
++on_keys_changed	.pc/trailing_newlines_fix_1/lib/autokey/interface.py	/^    def on_keys_changed(self, data=None):$/;"	m	class:XInterfaceBase
 +on_keys_changed	lib/autokey/interface.py	/^    def on_keys_changed(self, data=None):$/;"	m	class:XInterfaceBase
 +on_matchCaseCheckbox_stateChanged	lib/autokey/gtkui/dialogs.py	/^    def on_matchCaseCheckbox_stateChanged(self, widget, data=None):$/;"	m	class:AbbrSettingsDialog
 +on_matchCaseCheckbox_stateChanged	lib/autokey/qtui/dialogs.py	/^    def on_matchCaseCheckbox_stateChanged(self, state):$/;"	m	class:AbbrSettings
@@ -2855,6 +3112,8 @@ Last-Update: 2018-05-13
 +on_urlLabel_leftClickedUrl	lib/autokey/qtui/configwindow.py	/^    def on_urlLabel_leftClickedUrl(self, url=None):$/;"	m	class:FolderPage
 +on_urlLabel_leftClickedUrl	lib/autokey/qtui/configwindow.py	/^    def on_urlLabel_leftClickedUrl(self, url=None):$/;"	m	class:PhrasePage
 +on_urlLabel_leftClickedUrl	lib/autokey/qtui/configwindow.py	/^    def on_urlLabel_leftClickedUrl(self, url=None):$/;"	m	class:ScriptPage
++open_file	.pc/trailing_newlines_fix_1/lib/autokey/scripting.py	/^    def open_file(self, title="Open File", **kwargs):$/;"	m	class:GtkDialog
++open_file	.pc/trailing_newlines_fix_1/lib/autokey/scripting.py	/^    def open_file(self, title="Open File", initialDir="~", fileTypes="*|All Files", rememberAs=None, **kwargs):$/;"	m	class:QtDialog
 +open_file	doc/scripting/lib.scripting.GtkDialog-class.html	/^<a name="open_file"><\/a>$/;"	a
 +open_file	doc/scripting/lib.scripting.QtDialog-class.html	/^<a name="open_file"><\/a>$/;"	a
 +open_file	lib/autokey/scripting.py	/^    def open_file(self, title="Open File", **kwargs):$/;"	m	class:GtkDialog
@@ -2864,6 +3123,8 @@ Last-Update: 2018-05-13
 +package_dir	setup.py	/^    package_dir={'': 'lib'},$/;"	v
 +packages	setup.py	/^    packages=['autokey', 'autokey.gtkui', 'autokey.qtui'],$/;"	v
 +parsePositionTokens	lib/autokey/model.py	/^    def parsePositionTokens(self, expansion):$/;"	m	class:Phrase
++password_dialog	.pc/trailing_newlines_fix_1/lib/autokey/scripting.py	/^    def password_dialog(self, title="Enter password", message="Enter password", **kwargs):$/;"	m	class:GtkDialog
++password_dialog	.pc/trailing_newlines_fix_1/lib/autokey/scripting.py	/^    def password_dialog(self, title="Enter password", message="Enter password", **kwargs):$/;"	m	class:QtDialog
 +password_dialog	doc/scripting/lib.scripting.GtkDialog-class.html	/^<a name="password_dialog"><\/a>$/;"	a
 +password_dialog	doc/scripting/lib.scripting.QtDialog-class.html	/^<a name="password_dialog"><\/a>$/;"	a
 +password_dialog	lib/autokey/scripting.py	/^    def password_dialog(self, title="Enter password", message="Enter password", **kwargs):$/;"	m	class:GtkDialog
@@ -2886,6 +3147,8 @@ Last-Update: 2018-05-13
 +populate_store	lib/autokey/gtkui/configwindow.py	/^    def populate_store(self, parent, parentFolder):$/;"	m	class:AkTreeModel
 +populate_tree	lib/autokey/qtui/configwindow.py	/^    def populate_tree(self, config):$/;"	m	class:CentralWidget
 +postEventWithCallback	lib/autokey/qtapp.py	/^    def postEventWithCallback(self, callback, *args):$/;"	m	class:CallbackEventHandler
++press_key	.pc/trailing_newlines_fix_1/lib/autokey/interface.py	/^    def press_key(self, keyName):$/;"	m	class:XInterfaceBase
++press_key	.pc/trailing_newlines_fix_1/lib/autokey/scripting.py	/^    def press_key(self, key):$/;"	m	class:Keyboard
 +press_key	doc/scripting/lib.scripting.Keyboard-class.html	/^<a name="press_key"><\/a>$/;"	a
 +press_key	lib/autokey/interface.py	/^    def press_key(self, keyName):$/;"	m	class:XInterfaceBase
 +press_key	lib/autokey/iomediator/_iomediator.py	/^    def press_key(self, keyName):$/;"	m	class:IoMediator
@@ -2923,6 +3186,8 @@ Last-Update: 2018-05-13
 +redo	lib/autokey/qtui/configwindow.py	/^    def redo(self):$/;"	m	class:PhrasePage
 +redo	lib/autokey/qtui/configwindow.py	/^    def redo(self):$/;"	m	class:ScriptPage
 +refresh_tree	lib/autokey/gtkui/configwindow.py	/^    def refresh_tree(self):$/;"	m	class:ConfigWindow
++release_key	.pc/trailing_newlines_fix_1/lib/autokey/interface.py	/^    def release_key(self, keyName):$/;"	m	class:XInterfaceBase
++release_key	.pc/trailing_newlines_fix_1/lib/autokey/scripting.py	/^    def release_key(self, key):$/;"	m	class:Keyboard
 +release_key	doc/scripting/lib.scripting.Keyboard-class.html	/^<a name="release_key"><\/a>$/;"	a
 +release_key	lib/autokey/interface.py	/^    def release_key(self, keyName):$/;"	m	class:XInterfaceBase
 +release_key	lib/autokey/iomediator/_iomediator.py	/^    def release_key(self, keyName):$/;"	m	class:IoMediator
@@ -2957,6 +3222,7 @@ Last-Update: 2018-05-13
 +reset_focus	lib/autokey/gtkui/dialogs.py	/^    def reset_focus(self):$/;"	m	class:WindowFilterSettingsDialog
 +reset_focus	lib/autokey/qtui/dialogs.py	/^    def reset_focus(self):$/;"	m	class:AbbrSettingsDialog
 +reset_focus	lib/autokey/qtui/dialogs.py	/^    def reset_focus(self):$/;"	m	class:WindowFilterSettingsDialog
++resize_move	.pc/trailing_newlines_fix_1/lib/autokey/scripting.py	/^    def resize_move(self, title, xOrigin=-1, yOrigin=-1, width=-1, height=-1, matchClass=False):$/;"	m	class:Window
 +resize_move	doc/scripting/lib.scripting.Window-class.html	/^<a name="resize_move"><\/a>$/;"	a
 +resize_move	lib/autokey/scripting.py	/^    def resize_move(self, title, xOrigin=-1, yOrigin=-1, width=-1, height=-1, matchClass=False):$/;"	m	class:Window
 +retranslateUi	lib/autokey/qtui/abbrsettings.py	/^    def retranslateUi(self, Form):$/;"	m	class:Ui_Form
@@ -2972,6 +3238,7 @@ Last-Update: 2018-05-13
 +retranslateUi	lib/autokey/qtui/settingswidget.py	/^    def retranslateUi(self, SettingsWidget):$/;"	m	class:Ui_SettingsWidget
 +retranslateUi	lib/autokey/qtui/specialhotkeysettings.py	/^    def retranslateUi(self, Form):$/;"	m	class:Ui_Form
 +retranslateUi	lib/autokey/qtui/windowfiltersettings.py	/^    def retranslateUi(self, Form):$/;"	m	class:Ui_Form
++run	.pc/trailing_newlines_fix_1/lib/autokey/interface.py	/^    def run(self):$/;"	m	class:XRecordInterface
 +run	lib/autokey/interface.py	/^    def run(self):$/;"	m	class:XRecordInterface
 +run	lib/autokey/iomediator/_iomediator.py	/^    def run(self):$/;"	m	class:IoMediator
 +run	lib/autokey/monitor.py	/^    def run(self):        $/;"	m	class:FileMonitor
@@ -2979,10 +3246,12 @@ Last-Update: 2018-05-13
 +run_folder	lib/autokey/service.py	/^    def run_folder(self, name):$/;"	m	class:Service
 +run_phrase	lib/autokey/common.py	/^    def run_phrase(self, name):$/;"	m	class:AppService
 +run_phrase	lib/autokey/service.py	/^    def run_phrase(self, name):$/;"	m	class:Service
++run_script	.pc/trailing_newlines_fix_1/lib/autokey/scripting.py	/^    def run_script(self, description):$/;"	m	class:Engine
 +run_script	doc/scripting/lib.scripting.Engine-class.html	/^<a name="run_script"><\/a>$/;"	a
 +run_script	lib/autokey/common.py	/^    def run_script(self, name):$/;"	m	class:AppService
 +run_script	lib/autokey/scripting.py	/^    def run_script(self, description):$/;"	m	class:Engine
 +run_script	lib/autokey/service.py	/^    def run_script(self, name):$/;"	m	class:Service
++run_script_from_macro	.pc/trailing_newlines_fix_1/lib/autokey/scripting.py	/^    def run_script_from_macro(self, args):$/;"	m	class:Engine
 +run_script_from_macro	doc/scripting/lib.scripting.Engine-class.html	/^          <td><span class="summary-sig"><a name="run_script_from_macro"><\/a><span class="summary-sig-name">run_script_from_macro<\/span>(<span class="summary-sig-arg">self<\/span>,$/;"	a
 +run_script_from_macro	lib/autokey/scripting.py	/^    def run_script_from_macro(self, args):$/;"	m	class:Engine
 +run_subscript	lib/autokey/service.py	/^    def run_subscript(self, script):$/;"	m	class:ScriptRunner
@@ -3009,6 +3278,8 @@ Last-Update: 2018-05-13
 +save_completed	lib/autokey/gtkui/configwindow.py	/^    def save_completed(self, persistGlobal):$/;"	m	class:ConfigWindow
 +save_completed	lib/autokey/qtui/configwindow.py	/^    def save_completed(self, persistGlobal):$/;"	m	class:ConfigWindow
 +save_config	lib/autokey/configmanager.py	/^def save_config(configManager):$/;"	f
++save_file	.pc/trailing_newlines_fix_1/lib/autokey/scripting.py	/^    def save_file(self, title="Save As", **kwargs):$/;"	m	class:GtkDialog
++save_file	.pc/trailing_newlines_fix_1/lib/autokey/scripting.py	/^    def save_file(self, title="Save As", initialDir="~", fileTypes="*|All Files", rememberAs=None, **kwargs):$/;"	m	class:QtDialog
 +save_file	doc/scripting/lib.scripting.GtkDialog-class.html	/^<a name="save_file"><\/a>$/;"	a
 +save_file	doc/scripting/lib.scripting.QtDialog-class.html	/^<a name="save_file"><\/a>$/;"	a
 +save_file	lib/autokey/scripting.py	/^    def save_file(self, title="Save As", **kwargs):$/;"	m	class:GtkDialog
@@ -3039,21 +3310,29 @@ Last-Update: 2018-05-13
 +section-Properties	doc/scripting/lib.scripting.Store-class.html	/^<a name="section-Properties"><\/a>$/;"	a
 +section-Variables	doc/scripting/lib.scripting-module.html	/^<a name="section-Variables"><\/a>$/;"	a
 +send_backspace	lib/autokey/iomediator/_iomediator.py	/^    def send_backspace(self, count):$/;"	m	class:IoMediator
++send_key	.pc/trailing_newlines_fix_1/lib/autokey/interface.py	/^    def send_key(self, keyName):$/;"	m	class:XInterfaceBase
++send_key	.pc/trailing_newlines_fix_1/lib/autokey/scripting.py	/^    def send_key(self, key, repeat=1):$/;"	m	class:Keyboard
 +send_key	doc/scripting/lib.scripting.Keyboard-class.html	/^<a name="send_key"><\/a>$/;"	a
 +send_key	lib/autokey/interface.py	/^    def send_key(self, keyName):$/;"	m	class:XInterfaceBase
 +send_key	lib/autokey/iomediator/_iomediator.py	/^    def send_key(self, keyName):$/;"	m	class:IoMediator
 +send_key	lib/autokey/scripting.py	/^    def send_key(self, key, repeat=1):$/;"	m	class:Keyboard
++send_keys	.pc/trailing_newlines_fix_1/lib/autokey/scripting.py	/^    def send_keys(self, keyString):$/;"	m	class:Keyboard
 +send_keys	doc/scripting/lib.scripting.Keyboard-class.html	/^<a name="send_keys"><\/a>$/;"	a
 +send_keys	lib/autokey/scripting.py	/^    def send_keys(self, keyString):$/;"	m	class:Keyboard
 +send_left	lib/autokey/iomediator/_iomediator.py	/^    def send_left(self, count):$/;"	m	class:IoMediator
++send_modified_key	.pc/trailing_newlines_fix_1/lib/autokey/interface.py	/^    def send_modified_key(self, keyName, modifiers):$/;"	m	class:XInterfaceBase
 +send_modified_key	lib/autokey/interface.py	/^    def send_modified_key(self, keyName, modifiers):$/;"	m	class:XInterfaceBase
++send_mouse_click	.pc/trailing_newlines_fix_1/lib/autokey/interface.py	/^    def send_mouse_click(self, xCoord, yCoord, button, relative):$/;"	m	class:XInterfaceBase
 +send_mouse_click	lib/autokey/interface.py	/^    def send_mouse_click(self, xCoord, yCoord, button, relative):$/;"	m	class:XInterfaceBase
 +send_mouse_click	lib/autokey/iomediator/_iomediator.py	/^    def send_mouse_click(self, x, y, button, relative):$/;"	m	class:IoMediator
++send_mouse_click_relative	.pc/trailing_newlines_fix_1/lib/autokey/interface.py	/^    def send_mouse_click_relative(self, xoff, yoff, button):$/;"	m	class:XInterfaceBase
 +send_mouse_click_relative	lib/autokey/interface.py	/^    def send_mouse_click_relative(self, xoff, yoff, button):$/;"	m	class:XInterfaceBase
 +send_mouse_click_relative	lib/autokey/iomediator/_iomediator.py	/^    def send_mouse_click_relative(self, x, y, button):$/;"	m	class:IoMediator
 +send_right	lib/autokey/iomediator/_iomediator.py	/^    def send_right(self, count):$/;"	m	class:IoMediator
++send_string	.pc/trailing_newlines_fix_1/lib/autokey/interface.py	/^    def send_string(self, string):$/;"	m	class:XInterfaceBase
 +send_string	lib/autokey/interface.py	/^    def send_string(self, string):$/;"	m	class:XInterfaceBase
 +send_string	lib/autokey/iomediator/_iomediator.py	/^    def send_string(self, string: str):$/;"	m	class:IoMediator
++send_string_clipboard	.pc/trailing_newlines_fix_1/lib/autokey/interface.py	/^    def send_string_clipboard(self, string, pasteCommand):$/;"	m	class:XInterfaceBase
 +send_string_clipboard	lib/autokey/interface.py	/^    def send_string_clipboard(self, string, pasteCommand):$/;"	m	class:XInterfaceBase
 +send_up	lib/autokey/iomediator/_iomediator.py	/^    def send_up(self, count):$/;"	m	class:IoMediator
 +setData	lib/autokey/qtui/dialogs.py	/^    def setData(self, role, value):$/;"	m	class:AbbrListItem
@@ -3096,12 +3375,14 @@ Last-Update: 2018-05-13
 +set_modes	lib/autokey/model.py	/^    def set_modes(self, modes):$/;"	m	class:Phrase
 +set_modes	lib/autokey/model.py	/^    def set_modes(self, modes):$/;"	m	class:Script
 +set_modifier_state	lib/autokey/iomediator/_iomediator.py	/^    def set_modifier_state(self, modifier, state):$/;"	m	class:IoMediator
++set_property	.pc/trailing_newlines_fix_1/lib/autokey/scripting.py	/^    def set_property(self, title, action, prop, matchClass=False):$/;"	m	class:Window
 +set_property	doc/scripting/lib.scripting.Window-class.html	/^<a name="set_property"><\/a>$/;"	a
 +set_property	lib/autokey/scripting.py	/^    def set_property(self, title, action, prop, matchClass=False):$/;"	m	class:Window
 +set_record_keyboard	lib/autokey/iomediator/_keygrabber.py	/^    def set_record_keyboard(self, doIt):$/;"	m	class:Recorder
 +set_record_mouse	lib/autokey/iomediator/_keygrabber.py	/^    def set_record_mouse(self, doIt):$/;"	m	class:Recorder
 +set_redo_available	lib/autokey/gtkui/configwindow.py	/^    def set_redo_available(self, state):$/;"	m	class:ConfigWindow
 +set_redo_available	lib/autokey/qtui/configwindow.py	/^    def set_redo_available(self, state):$/;"	m	class:ConfigWindow
++set_return_value	.pc/trailing_newlines_fix_1/lib/autokey/scripting.py	/^    def set_return_value(self, val):$/;"	m	class:Engine
 +set_return_value	doc/scripting/lib.scripting.Engine-class.html	/^<a name="set_return_value"><\/a>$/;"	a
 +set_return_value	lib/autokey/scripting.py	/^    def set_return_value(self, val):$/;"	m	class:Engine
 +set_splitter	lib/autokey/qtui/configwindow.py	/^    def set_splitter(self, winSize):$/;"	m	class:CentralWidget
@@ -3150,6 +3431,7 @@ Last-Update: 2018-05-13
 +slotButtonClicked	lib/autokey/qtui/dialogs.py	/^    def slotButtonClicked(self, button):$/;"	m	class:RecordDialog
 +slotButtonClicked	lib/autokey/qtui/dialogs.py	/^    def slotButtonClicked(self, button):$/;"	m	class:WindowFilterSettingsDialog
 +slotButtonClicked	lib/autokey/qtui/settingsdialog.py	/^    def slotButtonClicked(self, button):$/;"	m	class:SettingsDialog
++start	.pc/trailing_newlines_fix_1/lib/autokey/interface.py	/^    def start(self):$/;"	m	class:AtSpiInterface
 +start	lib/autokey/interface.py	/^    def start(self):$/;"	m	class:AtSpiInterface
 +start	lib/autokey/iomediator/_keygrabber.py	/^    def start(self):$/;"	m	class:KeyGrabber
 +start	lib/autokey/iomediator/_keygrabber.py	/^    def start(self, delay):$/;"	m	class:Recorder
@@ -3165,9 +3447,12 @@ Last-Update: 2018-05-13
 +stop	lib/autokey/iomediator/_keygrabber.py	/^    def stop(self):$/;"	m	class:Recorder
 +stop	lib/autokey/monitor.py	/^    def stop(self):$/;"	m	class:FileMonitor
 +stop_withgrab	lib/autokey/iomediator/_keygrabber.py	/^    def stop_withgrab(self):$/;"	m	class:Recorder
++str_or_bytes_to_bytes	.pc/trailing_newlines_fix_1/lib/autokey/interface.py	/^def str_or_bytes_to_bytes(x: Union[str, bytes, memoryview]) -> bytes:$/;"	f
 +str_or_bytes_to_bytes	lib/autokey/interface.py	/^def str_or_bytes_to_bytes(x: Union[str, bytes, memoryview]) -> bytes:$/;"	f
++str_or_bytes_to_str	.pc/trailing_newlines_fix_1/lib/autokey/interface.py	/^def str_or_bytes_to_str(x: Union[str, bytes]) -> str:$/;"	f
 +str_or_bytes_to_str	lib/autokey/interface.py	/^def str_or_bytes_to_str(x: Union[str, bytes]) -> str:$/;"	f
 +suspend	lib/autokey/monitor.py	/^    def suspend(self):$/;"	m	class:FileMonitor
++switch_desktop	.pc/trailing_newlines_fix_1/lib/autokey/scripting.py	/^    def switch_desktop(self, deskNum):$/;"	m	class:Window
 +switch_desktop	doc/scripting/lib.scripting.Window-class.html	/^<a name="switch_desktop"><\/a>$/;"	a
 +switch_desktop	lib/autokey/scripting.py	/^    def switch_desktop(self, deskNum):$/;"	m	class:Window
 +synchronized	lib/autokey/service.py	/^def synchronized(lock):$/;"	f
@@ -3210,7 +3495,9 @@ Last-Update: 2018-05-13
 +undo	lib/autokey/qtui/configwindow.py	/^    def undo(self):$/;"	m	class:PhrasePage
 +undo	lib/autokey/qtui/configwindow.py	/^    def undo(self):$/;"	m	class:ScriptPage
 +undo_expansion	lib/autokey/service.py	/^    def undo_expansion(self):$/;"	m	class:PhraseRunner
++ungrab_hotkey	.pc/trailing_newlines_fix_1/lib/autokey/interface.py	/^    def ungrab_hotkey(self, item):$/;"	m	class:XInterfaceBase
 +ungrab_hotkey	lib/autokey/interface.py	/^    def ungrab_hotkey(self, item):$/;"	m	class:XInterfaceBase
++ungrab_keyboard	.pc/trailing_newlines_fix_1/lib/autokey/interface.py	/^    def ungrab_keyboard(self):$/;"	m	class:XInterfaceBase
 +ungrab_keyboard	lib/autokey/interface.py	/^    def ungrab_keyboard(self):$/;"	m	class:XInterfaceBase
 +unpause	lib/autokey/service.py	/^    def unpause(self):$/;"	m	class:Service
 +unpause_service	lib/autokey/gtkapp.py	/^    def unpause_service(self):$/;"	m	class:Application
@@ -3250,12 +3537,16 @@ Last-Update: 2018-05-13
 +version	setup.py	/^    version=R.VERSION,$/;"	v
 +visgrep	lib/autokey/scripting_highlevel.py	/^def visgrep(scr: str, pat: str, tolerance: int = 0) -> int:$/;"	f
 +wait	lib/autokey/iomediator/_waiter.py	/^    def wait(self):$/;"	m	class:Waiter
++wait_for_click	.pc/trailing_newlines_fix_1/lib/autokey/scripting.py	/^    def wait_for_click(self, button, timeOut=10.0):$/;"	m	class:Mouse
 +wait_for_click	doc/scripting/lib.scripting.Mouse-class.html	/^<a name="wait_for_click"><\/a>$/;"	a
 +wait_for_click	lib/autokey/scripting.py	/^    def wait_for_click(self, button, timeOut=10.0):$/;"	m	class:Mouse
++wait_for_exist	.pc/trailing_newlines_fix_1/lib/autokey/scripting.py	/^    def wait_for_exist(self, title, timeOut=5):$/;"	m	class:Window
 +wait_for_exist	doc/scripting/lib.scripting.Window-class.html	/^<a name="wait_for_exist"><\/a>$/;"	a
 +wait_for_exist	lib/autokey/scripting.py	/^    def wait_for_exist(self, title, timeOut=5):$/;"	m	class:Window
++wait_for_focus	.pc/trailing_newlines_fix_1/lib/autokey/scripting.py	/^    def wait_for_focus(self, title, timeOut=5):$/;"	m	class:Window
 +wait_for_focus	doc/scripting/lib.scripting.Window-class.html	/^<a name="wait_for_focus"><\/a>$/;"	a
 +wait_for_focus	lib/autokey/scripting.py	/^    def wait_for_focus(self, title, timeOut=5):$/;"	m	class:Window
++wait_for_keypress	.pc/trailing_newlines_fix_1/lib/autokey/scripting.py	/^    def wait_for_keypress(self, key, modifiers: list=None, timeOut=10.0):$/;"	m	class:Keyboard
 +wait_for_keypress	doc/scripting/lib.scripting.Keyboard-class.html	/^<a name="wait_for_keypress"><\/a>$/;"	a
 +wait_for_keypress	lib/autokey/scripting.py	/^    def wait_for_keypress(self, key, modifiers: list=None, timeOut=10.0):$/;"	m	class:Keyboard
 +wrap	lib/autokey/service.py	/^    def wrap(f):$/;"	f	function:synchronized
