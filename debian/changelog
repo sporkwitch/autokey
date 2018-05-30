@@ -1,3 +1,9 @@
+autokey (0.94.1-0ubuntu4) bionic; urgency=medium
+
+  * Integrate upstream fix for mouse selection 
+
+ -- Robert Klebes <robert@klebes.info>  Wed, 30 May 2018 17:00:03 -0400
+
 autokey (0.94.1-0ubuntu3) bionic; urgency=low
 
   * Integrate upstream fix for trailing newlines 
