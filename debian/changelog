@@ -1,3 +1,16 @@
+autokey (0.94.1-0ubuntu7) bionic; urgency=medium
+
+  * Update build deps 
+
+ -- Robert Klebes <robert@klebes.info>  Mon, 25 Jun 2018 10:26:50 -0400
+
+autokey (0.94.1-0ubuntu6) bionic; urgency=medium
+
+  * Update Qt libs
+  * Add -qt GUI
+
+ -- Robert Klebes <robert@klebes.info>  Mon, 25 Jun 2018 10:13:03 -0400
+
 autokey (0.94.1-0ubuntu5) bionic; urgency=high
 
   * Fix control file, incremented version 
