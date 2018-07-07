@@ -1,3 +1,9 @@
+autokey (0.95.1-0ubuntu1) bionic; urgency=medium
+
+  * Maintain launchpad build deps 
+
+ -- Robert Klebes <robert@klebes.info>  Sat, 07 Jul 2018 11:25:25 -0400
+
 autokey (0.95.1-0) bionic; urgency=medium
 
   * Fix a long standing bug that errors occurring during phrase parsing or script execution can lock up the user keyboard. Make sure to always release the keyboard after grabbing it.
