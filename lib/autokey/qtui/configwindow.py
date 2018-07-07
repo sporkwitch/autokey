@@ -20,11 +20,8 @@ import threading
 import time
 import webbrowser
 
-from PyQt5.QtCore import QPoint
-from PyQt5.QtGui import QIcon, QKeySequence
-from PyQt5.QtWidgets import QApplication, QAction, QMenu, QToolButton
-
-
+from PyQt5.QtGui import QIcon, QKeySequence, QCloseEvent
+from PyQt5.QtWidgets import QApplication, QAction, QMenu
 
 
 import autokey.common
@@ -40,10 +37,9 @@ PROBLEM_MSG_SECONDARY = "%1\n\nYour changes have not been saved."
 _logger = autokey.qtui.common.logger.getChild("configwindow")  # type: logging.Logger
 
 
-
 class ConfigWindow(*autokey.qtui.common.inherits_from_ui_file_with_name("mainwindow")):
 
-    def __init__(self, app):
+    def __init__(self, app: QApplication):
         super().__init__()
         self.setupUi(self)
         self.about_dialog = dialogs.AboutAutokeyDialog(self)
@@ -59,19 +55,6 @@ class ConfigWindow(*autokey.qtui.common.inherits_from_ui_file_with_name("mainwin
         self._set_platform_specific_keyboard_shortcuts()
         self.central_widget.init(app)
         self.central_widget.populate_tree(self.app.configManager)
-
-    def _show_action_create_popup(self):
-        """
-        Wrapper slot that is called by clicking on action_create. It causes the action to show its popup menu.
-        Reasoning: The Action is shown as "[<icon>]v" . Clicking on the downwards arrow opens the popup menu as
-        expected, but clicking on the larger icon does nothing, because no action is associated.
-        The intention is to show the popup regardless of where the user places the click, so call exec_ on the menu.
-        Simply using action_create.triggered.connect(action_create.menu().exec_) does not properly set the popup
-        position, instead it uses the last known position instead of positioning below the icon.
-        So use the way recommended in the Qt documentation.
-        """
-        toolbar_button = self.toolbar.widgetForAction(self.action_create)  # type:QToolButton
-        self.action_create.menu().popup(toolbar_button.mapToGlobal(QPoint(0, toolbar_button.height())))
 
     def _create_action_create(self) -> QAction:
         """
@@ -89,10 +72,17 @@ class ConfigWindow(*autokey.qtui.common.inherits_from_ui_file_with_name("mainwin
             self.action_new_script
         ))
         action_create.setMenu(create_menu)
-        action_create.triggered.connect(self._show_action_create_popup)
         return action_create
 
     def _connect_all_file_menu_signals(self):
+        # Show the action_create popup menu regardless where the user places the click.
+        # The Action is displayed as "[<icon>]v". Clicking on the downwards arrow opens the popup menu as
+        # expected, but clicking on the larger icon does nothing by default, because no action is associated.
+        # The intention is to show the popup regardless of where the user places the click, so call the containing
+        # button’s showMenu when the action itself is pressed.
+        #
+        # Unlike other methods using action_create.menu().exec_() or .popup(position), this way is 100% UI consistent.
+        self.action_create.triggered.connect(self.toolbar.widgetForAction(self.action_create).showMenu)
         self.action_new_top_folder.triggered.connect(self.central_widget.on_new_topfolder)
         self.action_new_sub_folder.triggered.connect(self.central_widget.on_new_folder)
         self.action_new_phrase.triggered.connect(self.central_widget.on_new_phrase)
@@ -135,10 +125,10 @@ class ConfigWindow(*autokey.qtui.common.inherits_from_ui_file_with_name("mainwin
         self.action_configure_autokey.triggered.connect(self.on_advanced_settings)
 
     def _connect_all_help_menu_signals(self):
-        self.action_show_online_manual.triggered.connect(self.on_show_help)
-        self.action_show_faq.triggered.connect(self.on_show_faq)
-        self.action_show_api.triggered.connect(self.on_show_api)
-        self.action_report_bug.triggered.connect(self.on_report_bug)
+        self.action_show_online_manual.triggered.connect(lambda: self.open_external_url(autokey.common.HELP_URL))
+        self.action_show_faq.triggered.connect(lambda: self.open_external_url(autokey.common.FAQ_URL))
+        self.action_show_api.triggered.connect(lambda: self.open_external_url(autokey.common.API_URL))
+        self.action_report_bug.triggered.connect(lambda: self.open_external_url(autokey.common.BUG_URL))
         self.action_about_autokey.triggered.connect(self.about_dialog.show)
         self.action_about_qt.triggered.connect(QApplication.aboutQt)
 
@@ -179,12 +169,15 @@ class ConfigWindow(*autokey.qtui.common.inherits_from_ui_file_with_name("mainwin
         self.central_widget.set_dirty(True)
         self.action_save.setEnabled(True)
 
-    def closeEvent(self, event):
+    def closeEvent(self, event: QCloseEvent):
         """
         This function is automatically called when the window is closed using the close [X] button in the window
         decorations or by right clicking in the system window list and using the close action, or similar ways to close
         the window.
         Just ignore this event and simulate that the user used the action_close_window instead.
+
+        To quote the Qt5 QCloseEvent documentation: If you do not want your widget to be hidden, or want some special
+        handling, you should reimplement the event handler and ignore() the event.
         """
         event.ignore()
         # Be safe and emit this signal, because it might be connected to multiple slots.
@@ -203,7 +196,7 @@ class ConfigWindow(*autokey.qtui.common.inherits_from_ui_file_with_name("mainwin
             for item in items:
                 if isinstance(item, model.Folder):
                     can_copy = False
-                    break        
+                    break
             
             self.action_new_top_folder.setEnabled(True)
             self.action_new_sub_folder.setEnabled(can_create)
@@ -309,17 +302,5 @@ class ConfigWindow(*autokey.qtui.common.inherits_from_ui_file_with_name("mainwin
     # Help Menu
 
     @staticmethod
-    def on_show_faq():
-        webbrowser.open(autokey.common.FAQ_URL, False, True)
-
-    @staticmethod
-    def on_show_help():
-        webbrowser.open(autokey.common.HELP_URL, False, True)
-
-    @staticmethod
-    def on_show_api():
-        webbrowser.open(autokey.common.API_URL, False, True)
-
-    @staticmethod
-    def on_report_bug():
-        webbrowser.open(autokey.common.BUG_URL, False, True)
+    def open_external_url(url: str):
+        webbrowser.open(url, False, True)

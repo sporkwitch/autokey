@@ -14,19 +14,22 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-import logging
+import typing
 
-from PyQt5.QtWidgets import QDialog, QWidget
-
-from autokey.configmanager import ConfigManager
+from PyQt5.QtWidgets import QDialog, QWidget, QApplication, QLabel, QPushButton
 
 from autokey.qtui.dialogs import GlobalHotkeyDialog
-import autokey.qtui.common
+import autokey.qtui.common as ui_common
 
-logger = autokey.qtui.common.logger.getChild("Special Hotkey Settings widget")  # type: logging.Logger
+if typing.TYPE_CHECKING:
+    import logging
+
+    from autokey.qtapp import Application
+
+logger = ui_common.logger.getChild("Special Hotkey Settings widget")  # type: logging.Logger
 
 
-class SpecialHotkeySettings(*autokey.qtui.common.inherits_from_ui_file_with_name("specialhotkeysettings")):
+class SpecialHotkeySettings(*ui_common.inherits_from_ui_file_with_name("specialhotkeysettings")):
     """
     The SpecialHotkeySettings class is used inside the AutoKey configuration dialog.
     It allows the user to select or clear global hotkeys.
@@ -41,22 +44,21 @@ class SpecialHotkeySettings(*autokey.qtui.common.inherits_from_ui_file_with_name
         super(SpecialHotkeySettings, self).__init__(parent)
         self.setupUi(self)
 
-        self.config_manager = None  # type: ConfigManager
 
         self.show_config_dlg = GlobalHotkeyDialog(parent)
         self.toggle_monitor_dlg = GlobalHotkeyDialog(parent)
         self.use_config_hotkey = False
         self.use_service_hotkey = False
-
-    def init(self, config_manager: ConfigManager):
-        self.config_manager = config_manager
-        self.use_config_hotkey = self._load_hotkey(config_manager.configHotkey, self.config_key_label,
+        app = QApplication.instance()  # type: Application
+        self.config_manager = app.configManager
+        self.use_config_hotkey = self._load_hotkey(self.config_manager.configHotkey, self.config_key_label,
                                                    self.show_config_dlg, self.clear_config_button)
-        self.use_service_hotkey = self._load_hotkey(config_manager.toggleServiceHotkey, self.monitor_key_label,
+        self.use_service_hotkey = self._load_hotkey(self.config_manager.toggleServiceHotkey, self.monitor_key_label,
                                                     self.toggle_monitor_dlg, self.clear_monitor_button)
 
+
     @staticmethod
-    def _load_hotkey(item, label, dialog, clear_button):
+    def _load_hotkey(item, label: QLabel, dialog: GlobalHotkeyDialog, clear_button: QPushButton):
         dialog.load(item)
         if item.enabled:
             key = item.hotKey
@@ -71,20 +73,20 @@ class SpecialHotkeySettings(*autokey.qtui.common.inherits_from_ui_file_with_name
     def save(self):
         config_hotkey = self.config_manager.configHotkey
         toggle_hotkey = self.config_manager.toggleServiceHotkey
-
+        app = QApplication.instance()  # type: Application
         if config_hotkey.enabled:
-            self.config_manager.app.hotkey_removed(config_hotkey)
+            app.hotkey_removed(config_hotkey)
         config_hotkey.enabled = self.use_config_hotkey
         if self.use_config_hotkey:
             self.show_config_dlg.save(config_hotkey)
-            self.config_manager.app.hotkey_created(config_hotkey)
+            app.hotkey_created(config_hotkey)
 
         if toggle_hotkey.enabled:
-            self.config_manager.app.hotkey_removed(toggle_hotkey)
+            app.hotkey_removed(toggle_hotkey)
         toggle_hotkey.enabled = self.use_service_hotkey
         if self.use_service_hotkey:
             self.toggle_monitor_dlg.save(toggle_hotkey)
-            self.config_manager.app.hotkey_created(toggle_hotkey)
+            app.hotkey_created(toggle_hotkey)
 
     # ---- Signal handlers
 
@@ -95,7 +97,7 @@ class SpecialHotkeySettings(*autokey.qtui.common.inherits_from_ui_file_with_name
             self.use_config_hotkey = True
             key = self.show_config_dlg.key
             modifiers = self.show_config_dlg.build_modifiers()
-            self.config_key_label.setText(self.show_config_dlg.targetItem.get_hotkey_string(key, modifiers))
+            self.config_key_label.setText(self.show_config_dlg.target_item.get_hotkey_string(key, modifiers))
             self.clear_config_button.setEnabled(True)
 
     def on_clear_config_button_pressed(self):
@@ -111,7 +113,7 @@ class SpecialHotkeySettings(*autokey.qtui.common.inherits_from_ui_file_with_name
             self.use_service_hotkey = True
             key = self.toggle_monitor_dlg.key
             modifiers = self.toggle_monitor_dlg.build_modifiers()
-            self.monitor_key_label.setText(self.toggle_monitor_dlg.targetItem.get_hotkey_string(key, modifiers))
+            self.monitor_key_label.setText(self.toggle_monitor_dlg.target_item.get_hotkey_string(key, modifiers))
             self.clear_monitor_button.setEnabled(True)
 
     def on_clear_monitor_button_pressed(self):

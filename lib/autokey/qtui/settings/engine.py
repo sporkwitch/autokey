@@ -16,11 +16,16 @@
 
 import sys
 import logging
+import typing
 
-from PyQt5.QtWidgets import QFileDialog, QWidget
+from PyQt5.QtCore import pyqtSlot
+from PyQt5.QtWidgets import QFileDialog, QWidget, QApplication
 
-from autokey.configmanager import ConfigManager
 from autokey.qtui import common
+
+if typing.TYPE_CHECKING:
+    from autokey.configmanager import ConfigManager
+
 
 logger = common.logger.getChild("AutoKey configuration")  # type: logging.Logger
 
@@ -38,16 +43,13 @@ class EngineSettings(*common.inherits_from_ui_file_with_name("enginesettings")):
         # It is used to reset the label to this value if a custom module path is currently set and the user deletes it.
         # Do not hard-code it to prevent possible inconsistencies.
         self.initial_folder_label_text = self.folder_label.text()
-        self.config_manager = None  # type: ConfigManager
-        self.path = None  # type: str
-        self.clear_button.setEnabled(self.path is not None)
-        logger.debug("EngineSettings widget created.")
 
-    def init(self, config_manager: ConfigManager):
-        self.config_manager = config_manager
-        self.path = config_manager.userCodeDir
-        if config_manager.userCodeDir is not None:
-            self.folder_label.setText(config_manager.userCodeDir)
+        self.config_manager = QApplication.instance().configManager
+        self.path = self.config_manager.userCodeDir
+        self.clear_button.setEnabled(self.path is not None)
+
+        if self.config_manager.userCodeDir is not None:
+            self.folder_label.setText(self.config_manager.userCodeDir)
         logger.debug("EngineSettings widget initialised, custom module search path is set to: {}".format(self.path))
 
     def save(self):
@@ -66,6 +68,7 @@ class EngineSettings(*common.inherits_from_ui_file_with_name("enginesettings")):
                 self.config_manager.userCodeDir = self.path
                 logger.info("Saved custom module search path and added it to sys.path: {}".format(self.path))
 
+    @pyqtSlot()
     def on_browse_button_pressed(self):
         """
         PyQt slot called when the user hits the "Browse" button.
@@ -79,6 +82,7 @@ class EngineSettings(*common.inherits_from_ui_file_with_name("enginesettings")):
             self.folder_label.setText(path)
             logger.debug("User selects a custom module search path: {}".format(self.path))
 
+    @pyqtSlot()
     def on_clear_button_pressed(self):
         """
         PyQt slot called when the user hits the "Clear" button.

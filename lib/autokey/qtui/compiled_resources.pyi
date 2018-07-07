@@ -12,19 +12,10 @@
 
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
-from PyQt5.QtWidgets import QWidget
-from PyQt5.QtCore import QSize
 
-import autokey.common
-from autokey.qtui import common as ui_common
+qt_resource_data = ...  # type: bytes
+qt_resource_name = ...  # type: bytes
+qt_resource_struct = ...  # type: bytes
 
-
-class AboutAutokeyDialog(*ui_common.inherits_from_ui_file_with_name("about_autokey_dialog")):
-
-    def __init__(self, parent: QWidget = None):
-        super(AboutAutokeyDialog, self).__init__(parent)
-        self.setupUi(self)
-        icon = ui_common.load_icon(ui_common.AutoKeyIcon.AUTOKEY)
-        pixmap = icon.pixmap(icon.actualSize(QSize(1024, 1024)))
-        self.autokey_icon.setPixmap(pixmap)
-        self.autokey_version_label.setText(autokey.common.VERSION)
+def qCleanupResources() -> None: ...
+def qInitResources() -> None: ...

@@ -208,7 +208,7 @@ class ConfigManager:
         
         self.app = app
         self.folders = []
-        self.userCodeDir = None
+        self.userCodeDir = None  # type: str
         
         self.configHotkey = GlobalHotkey()
         self.configHotkey.set_hotkey(["<super>"], "k")
@@ -312,7 +312,7 @@ winTitle = window.get_active_title()
 winClass = window.get_active_class()
 dialog.info_dialog("Window information", 
           "Active window information:\\nTitle: '%s'\\nClass: '%s'" % (winTitle, winClass))"""
-        win.showInTrayMenu = True
+        win.show_in_tray_menu = True
         sampleScripts.add_item(win)
         
         self.folders.append(sampleScripts)
